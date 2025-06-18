@@ -13,10 +13,14 @@ Use `-R` to recursively list subdirectories (symbolic links are not followed).
 Use `-F` to append indicators to entries: `/` for directories, `*` for executables and `@` for symbolic links.
 Use `-h` to display file sizes in human readable units when combined with `-l`.
 
-Example showing inode numbers and long format:
+Example of long format output:
 
 ```sh
-./build/vls -li
+$ ./build/vls -l
+vls 0.1
+-rw-r--r-- 1 user group 35149 Jun 18 16:55 LICENSE
+-rw-r--r-- 1 user group  1104 Jun 18 16:55 Makefile
+-rw-r--r-- 1 user group  1512 Jun 18 16:55 README.md
 ```
 
 ## Building and Testing
