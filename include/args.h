@@ -15,6 +15,7 @@ typedef struct {
     int sort_size;
     int reverse;
     int recursive;
+    int list_dirs_only;
     int follow_links;
     int human_readable;
     int classify;

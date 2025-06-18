@@ -71,7 +71,102 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_size, int reverse, int recursive, int classify, int human_readable, int follow_links) {
+void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_size, int reverse, int recursive, int classify, int human_readable, int follow_links, int list_dirs_only) {
+    if (list_dirs_only) {
+        struct stat st;
+        int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
+        if (stat_fn(path, &st) == -1) {
+            perror("stat");
+            return;
+        }
+
+        const char *prefix = "";
+        const char *suffix = "";
+        const char *indicator = "";
+        if (use_color) {
+            if (S_ISDIR(st.st_mode))
+                prefix = color_dir();
+            else if (S_ISLNK(st.st_mode))
+                prefix = color_link();
+            else if (st.st_mode & S_IXUSR)
+                prefix = color_exec();
+            suffix = color_reset();
+        }
+        if (classify) {
+            if (S_ISDIR(st.st_mode))
+                indicator = "/";
+            else if (S_ISLNK(st.st_mode))
+                indicator = "@";
+            else if (st.st_mode & S_IXUSR)
+                indicator = "*";
+        }
+
+        if (long_format) {
+            char size_buf[16];
+            if (human_readable)
+                human_size(st.st_size, size_buf, sizeof(size_buf));
+            else
+                snprintf(size_buf, sizeof(size_buf), "%lld", (long long)st.st_size);
+
+            struct passwd *pw = getpwuid(st.st_uid);
+            char owner_buf[32];
+            if (pw)
+                snprintf(owner_buf, sizeof(owner_buf), "%s", pw->pw_name);
+            else
+                snprintf(owner_buf, sizeof(owner_buf), "%u", st.st_uid);
+
+            struct group *gr = getgrgid(st.st_gid);
+            char group_buf[32];
+            if (gr)
+                snprintf(group_buf, sizeof(group_buf), "%s", gr->gr_name);
+            else
+                snprintf(group_buf, sizeof(group_buf), "%u", st.st_gid);
+
+            char perms[11];
+            perms[0] = S_ISDIR(st.st_mode) ? 'd' :
+                       S_ISLNK(st.st_mode) ? 'l' :
+                       S_ISCHR(st.st_mode) ? 'c' :
+                       S_ISBLK(st.st_mode) ? 'b' :
+                       S_ISFIFO(st.st_mode) ? 'p' :
+                       S_ISSOCK(st.st_mode) ? 's' : '-';
+            perms[1] = (st.st_mode & S_IRUSR) ? 'r' : '-';
+            perms[2] = (st.st_mode & S_IWUSR) ? 'w' : '-';
+            perms[3] = (st.st_mode & S_IXUSR) ? 'x' : '-';
+            perms[4] = (st.st_mode & S_IRGRP) ? 'r' : '-';
+            perms[5] = (st.st_mode & S_IWGRP) ? 'w' : '-';
+            perms[6] = (st.st_mode & S_IXGRP) ? 'x' : '-';
+            perms[7] = (st.st_mode & S_IROTH) ? 'r' : '-';
+            perms[8] = (st.st_mode & S_IWOTH) ? 'w' : '-';
+            perms[9] = (st.st_mode & S_IXOTH) ? 'x' : '-';
+            perms[10] = '\0';
+
+            char time_buf[32];
+            struct tm *tm = localtime(&st.st_mtime);
+            strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
+
+            if (show_inode)
+                printf("%10llu %s 1 %-*s %-*s %*s %s %s%s%s%s\n",
+                       (unsigned long long)st.st_ino, perms,
+                       (int)strlen(owner_buf), owner_buf,
+                       (int)strlen(group_buf), group_buf,
+                       (int)strlen(size_buf), size_buf,
+                       time_buf, prefix, path, suffix, indicator);
+            else
+                printf("%s 1 %-*s %-*s %*s %s %s%s%s%s\n",
+                       perms,
+                       (int)strlen(owner_buf), owner_buf,
+                       (int)strlen(group_buf), group_buf,
+                       (int)strlen(size_buf), size_buf,
+                       time_buf, prefix, path, suffix, indicator);
+        } else {
+            if (show_inode)
+                printf("%10llu %s%s%s%s\n", (unsigned long long)st.st_ino, prefix, path, suffix, indicator);
+            else
+                printf("%s%s%s%s\n", prefix, path, suffix, indicator);
+        }
+        return;
+    }
+
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
@@ -258,7 +353,7 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_size, reverse, recursive, classify, human_readable, follow_links);
+            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_size, reverse, recursive, classify, human_readable, follow_links, list_dirs_only);
         }
     }
 
