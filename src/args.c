@@ -13,6 +13,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->reverse = 0;
     args->recursive = 0;
     args->classify = 0;
+    args->follow_links = 0;
     args->human_readable = 0;
     args->path = ".";
 
@@ -23,7 +24,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "ialtrSChRFh", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "ialtrSChRFhL", long_options, NULL)) != -1) {
         switch (opt) {
         case 'a':
             args->show_hidden = 1;
@@ -49,6 +50,9 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'F':
             args->classify = 1;
             break;
+        case 'L':
+            args->follow_links = 1;
+            break;
         case 'h':
             args->human_readable = 1;
             break;
@@ -56,11 +60,12 @@ void parse_args(int argc, char *argv[], Args *args) {
             args->use_color = 0;
             break;
         case 1:
-            printf("Usage: %s [-a] [-l] [-i] [-t] [-S] [-r] [-R] [-F] [-h] [--no-color] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-l] [-i] [-t] [-S] [-r] [-R] [-L] [-F] [-h] [--no-color] [--help] [path]\n", argv[0]);
+            printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-l] [-i] [-t] [-S] [-r] [-R] [-F] [-h] [--no-color] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-l] [-i] [-t] [-S] [-r] [-R] [-L] [-F] [-h] [--no-color] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }
