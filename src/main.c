@@ -13,10 +13,11 @@ int main(int argc, char *argv[]) {
         const char *path = args.paths[i];
         if (!args.recursive && args.path_count > 1)
             printf("%s:\n", path);
-        list_directory(path, args.use_color, args.show_hidden, args.long_format,
-                      args.show_inode, args.sort_time, args.sort_size,
-                      args.reverse, args.recursive, args.classify,
-                      args.human_readable, args.follow_links);
+        list_directory(path, args.use_color, args.show_hidden, args.almost_all,
+                      args.long_format, args.show_inode, args.sort_time,
+                      args.sort_size, args.reverse, args.recursive,
+                      args.classify, args.human_readable,
+                      args.follow_links);
         if (i < args.path_count - 1)
             printf("\n");
     }
