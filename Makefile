@@ -1,6 +1,9 @@
 CC ?= cc
 CFLAGS ?= -Wall -Wextra -std=c99 -Iinclude
 
+PREFIX ?= /usr/local
+DESTDIR ?=
+
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
     PLATFORM_CFLAGS = -D_DARWIN_C_SOURCE
@@ -39,7 +42,17 @@ test: build/vls
 	./build/vls --no-color > /dev/null
 	@echo "Tests completed"
 
+install: build/vls
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -m 755 build/vls $(DESTDIR)$(PREFIX)/bin/
+	install -d $(DESTDIR)$(PREFIX)/share/man/man1
+	install -m 644 man/vls.1 $(DESTDIR)$(PREFIX)/share/man/man1/
+
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/vls
+	rm -f $(DESTDIR)$(PREFIX)/share/man/man1/vls.1
+
 clean:
 	rm -f build/vls build/*.o
 
-.PHONY: all clean test
+.PHONY: all clean test install uninstall
