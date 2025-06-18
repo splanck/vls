@@ -5,6 +5,7 @@
 #include <string.h>
 #include <limits.h>
 #include <unistd.h>
+#include <stdlib.h>
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
 # ifndef PATH_MAX
@@ -17,7 +18,13 @@
 #include "list.h"
 #include "color.h"
 
-void list_directory(const char *path, int use_color, int show_hidden, int long_format) {
+static int cmp_names(const void *a, const void *b) {
+    const char *sa = *(const char **)a;
+    const char *sb = *(const char **)b;
+    return strcmp(sa, sb);
+}
+
+void list_directory(const char *path, int use_color, int show_hidden, int long_format, int reverse) {
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
@@ -25,12 +32,36 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
     }
 
     struct dirent *entry;
-    char fullpath[PATH_MAX];
+    size_t count = 0, capacity = 32;
+    char **names = malloc(capacity * sizeof(char *));
+    if (!names) {
+        perror("malloc");
+        closedir(dir);
+        return;
+    }
+
     while ((entry = readdir(dir)) != NULL) {
         if (!show_hidden && entry->d_name[0] == '.')
             continue;
+        if (count == capacity) {
+            capacity *= 2;
+            char **tmp = realloc(names, capacity * sizeof(char *));
+            if (!tmp) {
+                perror("realloc");
+                goto cleanup;
+            }
+            names = tmp;
+        }
+        names[count++] = strdup(entry->d_name);
+    }
 
-        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entry->d_name);
+    qsort(names, count, sizeof(char *), cmp_names);
+
+    char fullpath[PATH_MAX];
+    for (size_t i = 0; i < count; i++) {
+        size_t idx = reverse ? count - 1 - i : i;
+        const char *name = names[idx];
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, name);
         struct stat st;
         if (lstat(fullpath, &st) == -1) {
             perror("stat");
@@ -50,10 +81,14 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
         }
 
         if (long_format)
-            printf("%s%10lld %s%s\n", prefix, (long long)st.st_size, entry->d_name, suffix);
+            printf("%s%10lld %s%s\n", prefix, (long long)st.st_size, name, suffix);
         else
-            printf("%s%s%s\n", prefix, entry->d_name, suffix);
+            printf("%s%s%s\n", prefix, name, suffix);
     }
 
+cleanup:
+    for (size_t i = 0; i < count; i++)
+        free(names[i]);
+    free(names);
     closedir(dir);
 }
