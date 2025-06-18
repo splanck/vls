@@ -1,6 +1,6 @@
 #ifndef LIST_H
 #define LIST_H
 
-void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only);
+void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only);
 
 #endif // LIST_H

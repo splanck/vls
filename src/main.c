@@ -16,9 +16,9 @@ int main(int argc, char *argv[]) {
         list_directory(path, args.use_color, args.show_hidden, args.almost_all,
                       args.long_format, args.show_inode, args.sort_time,
                       args.sort_atime, args.sort_size, args.reverse, args.recursive,
-                      args.classify, args.human_readable, args.numeric_ids,
-                      args.hide_owner, args.hide_group, args.follow_links,
-                      args.list_dirs_only);
+                      args.classify, args.slash_dirs, args.human_readable,
+                      args.numeric_ids, args.hide_owner, args.hide_group,
+                      args.follow_links, args.list_dirs_only);
         if (i < args.path_count - 1)
             printf("\n");
     }

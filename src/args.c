@@ -17,6 +17,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->recursive = 0;
     args->list_dirs_only = 0;
     args->classify = 0;
+    args->slash_dirs = 0;
     args->follow_links = 0;
     args->human_readable = 0;
     args->numeric_ids = 0;
@@ -33,7 +34,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtruSChRFhLdgon", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtruSChRFphLdgon", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -65,6 +66,9 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'd':
             args->list_dirs_only = 1;
             break;
+        case 'p':
+            args->slash_dirs = 1;
+            break;
         case 'F':
             args->classify = 1;
             break;
@@ -87,12 +91,12 @@ void parse_args(int argc, char *argv[], Args *args) {
             args->use_color = 0;
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }
