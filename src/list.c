@@ -6,6 +6,9 @@
 #include <limits.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <pwd.h>
+#include <grp.h>
+#include <time.h>
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
 # ifndef PATH_MAX
@@ -57,6 +60,15 @@ static void human_size(off_t size, char *buf, size_t bufsz) {
         snprintf(buf, bufsz, "%lld%c", (long long)s, suffixes[i]);
     else
         snprintf(buf, bufsz, "%.1f%c", s, suffixes[i]);
+}
+
+static size_t num_digits(unsigned long long n) {
+    size_t d = 1;
+    while (n >= 10) {
+        n /= 10;
+        d++;
+    }
+    return d;
 }
 
 void list_directory(const char *path, int use_color, int show_hidden, int long_format, int show_inode, int sort_time, int sort_size, int reverse, int recursive, int classify, int human_readable) {
@@ -112,6 +124,34 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
         cmp = cmp_mtime;
     qsort(entries, count, sizeof(Entry), cmp);
 
+    size_t link_w = 0, owner_w = 0, group_w = 0, size_w = 0;
+    if (long_format) {
+        for (size_t i = 0; i < count; i++) {
+            const Entry *ent = &entries[i];
+            if (num_digits(ent->st.st_nlink) > link_w)
+                link_w = num_digits(ent->st.st_nlink);
+
+            struct passwd *pw = getpwuid(ent->st.st_uid);
+            size_t len = pw ? strlen(pw->pw_name) : num_digits(ent->st.st_uid);
+            if (len > owner_w)
+                owner_w = len;
+
+            struct group *gr = getgrgid(ent->st.st_gid);
+            len = gr ? strlen(gr->gr_name) : num_digits(ent->st.st_gid);
+            if (len > group_w)
+                group_w = len;
+
+            char sz[16];
+            if (human_readable)
+                human_size(ent->st.st_size, sz, sizeof(sz));
+            else
+                snprintf(sz, sizeof(sz), "%lld", (long long)ent->st.st_size);
+            len = strlen(sz);
+            if (len > size_w)
+                size_w = len;
+        }
+    }
+
     for (size_t i = 0; i < count; i++) {
         size_t idx = reverse ? count - 1 - i : i;
         const Entry *ent = &entries[idx];
@@ -144,11 +184,58 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
             else
                 snprintf(size_buf, sizeof(size_buf), "%lld", (long long)ent->st.st_size);
 
-            if (show_inode)
-                printf("%10llu %s%10s %s%s%s\n", (unsigned long long)ent->st.st_ino,
-                       prefix, size_buf, ent->name, suffix, indicator);
+            struct passwd *pw = getpwuid(ent->st.st_uid);
+            char owner_buf[32];
+            if (pw)
+                snprintf(owner_buf, sizeof(owner_buf), "%s", pw->pw_name);
             else
-                printf("%s%10s %s%s%s\n", prefix, size_buf, ent->name, suffix, indicator);
+                snprintf(owner_buf, sizeof(owner_buf), "%u", ent->st.st_uid);
+
+            struct group *gr = getgrgid(ent->st.st_gid);
+            char group_buf[32];
+            if (gr)
+                snprintf(group_buf, sizeof(group_buf), "%s", gr->gr_name);
+            else
+                snprintf(group_buf, sizeof(group_buf), "%u", ent->st.st_gid);
+
+            char perms[11];
+            perms[0] = S_ISDIR(ent->st.st_mode) ? 'd' :
+                       S_ISLNK(ent->st.st_mode) ? 'l' :
+                       S_ISCHR(ent->st.st_mode) ? 'c' :
+                       S_ISBLK(ent->st.st_mode) ? 'b' :
+                       S_ISFIFO(ent->st.st_mode) ? 'p' :
+                       S_ISSOCK(ent->st.st_mode) ? 's' : '-';
+            perms[1] = (ent->st.st_mode & S_IRUSR) ? 'r' : '-';
+            perms[2] = (ent->st.st_mode & S_IWUSR) ? 'w' : '-';
+            perms[3] = (ent->st.st_mode & S_IXUSR) ? 'x' : '-';
+            perms[4] = (ent->st.st_mode & S_IRGRP) ? 'r' : '-';
+            perms[5] = (ent->st.st_mode & S_IWGRP) ? 'w' : '-';
+            perms[6] = (ent->st.st_mode & S_IXGRP) ? 'x' : '-';
+            perms[7] = (ent->st.st_mode & S_IROTH) ? 'r' : '-';
+            perms[8] = (ent->st.st_mode & S_IWOTH) ? 'w' : '-';
+            perms[9] = (ent->st.st_mode & S_IXOTH) ? 'x' : '-';
+            perms[10] = '\0';
+
+            char time_buf[32];
+            struct tm *tm = localtime(&ent->st.st_mtime);
+            strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
+
+            if (show_inode)
+                printf("%10llu %s %*lu %-*s %-*s %*s %s %s%s%s%s\n",
+                       (unsigned long long)ent->st.st_ino, perms,
+                       (int)link_w, (unsigned long)ent->st.st_nlink,
+                       (int)owner_w, owner_buf,
+                       (int)group_w, group_buf,
+                       (int)size_w, size_buf,
+                       time_buf, prefix, ent->name, suffix, indicator);
+            else
+                printf("%s %*lu %-*s %-*s %*s %s %s%s%s%s\n",
+                       perms,
+                       (int)link_w, (unsigned long)ent->st.st_nlink,
+                       (int)owner_w, owner_buf,
+                       (int)group_w, group_buf,
+                       (int)size_w, size_buf,
+                       time_buf, prefix, ent->name, suffix, indicator);
         } else {
             if (show_inode)
                 printf("%10llu %s%s%s%s\n", (unsigned long long)ent->st.st_ino, prefix, ent->name, suffix, indicator);
