@@ -11,6 +11,7 @@ Use `-S` to sort entries by file size.
 Use `-i` to display inode numbers.
 Use `-A` or `--almost-all` to show hidden entries except `.` and `..`.
 Use `-R` to recursively list subdirectories (symbolic links are not followed).
+Use `-d` to list directory arguments themselves rather than their contents.
 Use `-F` to append indicators to entries: `/` for directories, `*` for executables and `@` for symbolic links.
 Use `-h` to display file sizes in human readable units when combined with `-l`.
 Use `-L` to follow symbolic links when retrieving file details (the default is to display information about the links themselves).
