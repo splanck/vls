@@ -1,7 +1,7 @@
 CC = cc
 CFLAGS = -Wall -Wextra -std=c99 -Iinclude
-OBJS = build/main.o build/list.o
-DEPS = include/list.h
+OBJS = build/main.o build/list.o build/color.o
+DEPS = include/list.h include/color.h
 
 all: build/vls
 
@@ -13,6 +13,9 @@ build/main.o: src/main.c $(DEPS) | build
 
 build/list.o: src/list.c $(DEPS) | build
 	$(CC) $(CFLAGS) -c src/list.c -o build/list.o
+
+build/color.o: src/color.c include/color.h | build
+	$(CC) $(CFLAGS) -c src/color.c -o build/color.o
 
 build:
 	mkdir -p build
