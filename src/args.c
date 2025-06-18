@@ -23,18 +23,20 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->numeric_ids = 0;
     args->hide_owner = 0;
     args->hide_group = 0;
+    args->ignore_backups = 0;
     args->paths = NULL;
     args->path_count = 0;
 
     static struct option long_options[] = {
         {"no-color", no_argument, 0, 'C'},
         {"almost-all", no_argument, 0, 'A'},
+        {"ignore-backups", no_argument, 0, 'B'},
         {"help", no_argument, 0, 1},
         {0, 0, 0, 0}
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtruSChRFphLdgon", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtruSChRFpBhLdgon", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -69,6 +71,9 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'p':
             args->slash_dirs = 1;
             break;
+        case 'B':
+            args->ignore_backups = 1;
+            break;
         case 'F':
             args->classify = 1;
             break;
@@ -91,12 +96,12 @@ void parse_args(int argc, char *argv[], Args *args) {
             args->use_color = 0;
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }

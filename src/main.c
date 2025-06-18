@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
                       args.sort_atime, args.sort_size, args.reverse, args.recursive,
                       args.classify, args.slash_dirs, args.human_readable,
                       args.numeric_ids, args.hide_owner, args.hide_group,
-                      args.follow_links, args.list_dirs_only);
+                      args.follow_links, args.list_dirs_only, args.ignore_backups);
         if (i < args.path_count - 1)
             printf("\n");
     }
