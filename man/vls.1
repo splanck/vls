@@ -1,0 +1,70 @@
+.TH VLS 1 "June 18, 2025" "vls 0.1" "User Commands"
+.SH NAME
+vls \- colorized ls replacement
+.SH SYNOPSIS
+.B vls
+.RI [ OPTION ]... [ FILE ]...
+.SH DESCRIPTION
+.B vls
+is a minimal utility that lists directory contents similarly to
+.BR ls (1).
+File names are colorized by default. Use
+.BR --no-color
+ to disable colors.
+Default behavior is to display information about symbolic links. Use
+.BR -L
+to follow them.
+.SH OPTIONS
+.TP
+.BR -a
+Include directory entries whose names begin with a dot (.).
+.TP
+.BR -l
+Use a long listing format.
+.TP
+.BR -i
+Print the inode number of each file.
+.TP
+.BR -t
+Sort by modification time, newest first.
+.TP
+.BR -S
+Sort by file size, largest first.
+.TP
+.BR -r
+Reverse the sort order.
+.TP
+.BR -R
+List subdirectories recursively (symbolic links are not followed).
+.TP
+.BR -L
+Follow symbolic links when retrieving file details.
+.TP
+.BR -F
+Append indicator characters to entries: '/' for directories, '*' for executables and '@' for symbolic links.
+.TP
+.BR -h
+With
+.BR -l ,
+print sizes in human readable format.
+.TP
+.BR --no-color
+Disable colored output.
+.TP
+.BR --help
+Display a brief usage message and exit.
+.SH EXAMPLES
+.TP
+.B vls
+List the contents of the current directory.
+.TP
+.B vls -al
+List all files in long format.
+.TP
+.B vls -tR /etc
+Recursively list /etc sorted by modification time.
+.TP
+.B vls --no-color
+List current directory without colorization.
+.SH SEE ALSO
+.BR ls (1)
