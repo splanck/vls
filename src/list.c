@@ -18,13 +18,26 @@
 #include "list.h"
 #include "color.h"
 
+typedef struct {
+    char *name;
+    struct stat st;
+} Entry;
+
 static int cmp_names(const void *a, const void *b) {
-    const char *sa = *(const char **)a;
-    const char *sb = *(const char **)b;
-    return strcmp(sa, sb);
+    const Entry *ea = a;
+    const Entry *eb = b;
+    return strcmp(ea->name, eb->name);
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int long_format, int reverse) {
+static int cmp_mtime(const void *a, const void *b) {
+    const Entry *ea = a;
+    const Entry *eb = b;
+    if (ea->st.st_mtime == eb->st.st_mtime)
+        return 0;
+    return (ea->st.st_mtime > eb->st.st_mtime) ? -1 : 1;
+}
+
+void list_directory(const char *path, int use_color, int show_hidden, int long_format, int sort_time, int reverse) {
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
@@ -33,8 +46,8 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
 
     struct dirent *entry;
     size_t count = 0, capacity = 32;
-    char **names = malloc(capacity * sizeof(char *));
-    if (!names) {
+    Entry *entries = malloc(capacity * sizeof(Entry));
+    if (!entries) {
         perror("malloc");
         closedir(dir);
         return;
@@ -45,50 +58,55 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
             continue;
         if (count == capacity) {
             capacity *= 2;
-            char **tmp = realloc(names, capacity * sizeof(char *));
+            Entry *tmp = realloc(entries, capacity * sizeof(Entry));
             if (!tmp) {
                 perror("realloc");
                 goto cleanup;
             }
-            names = tmp;
+            entries = tmp;
         }
-        names[count++] = strdup(entry->d_name);
-    }
-
-    qsort(names, count, sizeof(char *), cmp_names);
-
-    char fullpath[PATH_MAX];
-    for (size_t i = 0; i < count; i++) {
-        size_t idx = reverse ? count - 1 - i : i;
-        const char *name = names[idx];
-        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, name);
-        struct stat st;
-        if (lstat(fullpath, &st) == -1) {
+        entries[count].name = strdup(entry->d_name);
+        if (!entries[count].name) {
+            perror("strdup");
+            goto cleanup;
+        }
+        char fullpath[PATH_MAX];
+        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entries[count].name);
+        if (lstat(fullpath, &entries[count].st) == -1) {
             perror("stat");
+            free(entries[count].name);
             continue;
         }
+        count++;
+    }
+
+    qsort(entries, count, sizeof(Entry), sort_time ? cmp_mtime : cmp_names);
+
+    for (size_t i = 0; i < count; i++) {
+        size_t idx = reverse ? count - 1 - i : i;
+        const Entry *ent = &entries[idx];
 
         const char *prefix = "";
         const char *suffix = "";
         if (use_color) {
-            if (S_ISDIR(st.st_mode))
+            if (S_ISDIR(ent->st.st_mode))
                 prefix = color_dir();
-            else if (S_ISLNK(st.st_mode))
+            else if (S_ISLNK(ent->st.st_mode))
                 prefix = color_link();
-            else if (st.st_mode & S_IXUSR)
+            else if (ent->st.st_mode & S_IXUSR)
                 prefix = color_exec();
             suffix = color_reset();
         }
 
         if (long_format)
-            printf("%s%10lld %s%s\n", prefix, (long long)st.st_size, name, suffix);
+            printf("%s%10lld %s%s\n", prefix, (long long)ent->st.st_size, ent->name, suffix);
         else
-            printf("%s%s%s\n", prefix, name, suffix);
+            printf("%s%s%s\n", prefix, ent->name, suffix);
     }
 
 cleanup:
     for (size_t i = 0; i < count; i++)
-        free(names[i]);
-    free(names);
+        free(entries[i].name);
+    free(entries);
     closedir(dir);
 }
