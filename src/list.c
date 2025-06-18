@@ -45,7 +45,21 @@ static int cmp_size(const void *a, const void *b) {
     return (ea->st.st_size > eb->st.st_size) ? -1 : 1;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int long_format, int show_inode, int sort_time, int sort_size, int reverse, int recursive, int classify) {
+static void human_size(off_t size, char *buf, size_t bufsz) {
+    const char suffixes[] = {'B','K','M','G','T','P'};
+    double s = (double)size;
+    int i = 0;
+    while (s >= 1024 && i < 5) {
+        s /= 1024;
+        i++;
+    }
+    if (i == 0)
+        snprintf(buf, bufsz, "%lld%c", (long long)s, suffixes[i]);
+    else
+        snprintf(buf, bufsz, "%.1f%c", s, suffixes[i]);
+}
+
+void list_directory(const char *path, int use_color, int show_hidden, int long_format, int show_inode, int sort_time, int sort_size, int reverse, int recursive, int classify, int human_readable) {
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
@@ -124,11 +138,17 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
         }
 
         if (long_format) {
-            if (show_inode)
-                printf("%10llu %s%10lld %s%s%s\n", (unsigned long long)ent->st.st_ino,
-                       prefix, (long long)ent->st.st_size, ent->name, suffix, indicator);
+            char size_buf[16];
+            if (human_readable)
+                human_size(ent->st.st_size, size_buf, sizeof(size_buf));
             else
-                printf("%s%10lld %s%s%s\n", prefix, (long long)ent->st.st_size, ent->name, suffix, indicator);
+                snprintf(size_buf, sizeof(size_buf), "%lld", (long long)ent->st.st_size);
+
+            if (show_inode)
+                printf("%10llu %s%10s %s%s%s\n", (unsigned long long)ent->st.st_ino,
+                       prefix, size_buf, ent->name, suffix, indicator);
+            else
+                printf("%s%10s %s%s%s\n", prefix, size_buf, ent->name, suffix, indicator);
         } else {
             if (show_inode)
                 printf("%10llu %s%s%s%s\n", (unsigned long long)ent->st.st_ino, prefix, ent->name, suffix, indicator);
@@ -148,7 +168,7 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, use_color, show_hidden, long_format, show_inode, sort_time, sort_size, reverse, recursive, classify);
+            list_directory(fullpath, use_color, show_hidden, long_format, show_inode, sort_time, sort_size, reverse, recursive, classify, human_readable);
         }
     }
 

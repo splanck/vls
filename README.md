@@ -11,6 +11,7 @@ Use `-S` to sort entries by file size.
 Use `-i` to display inode numbers.
 Use `-R` to recursively list subdirectories (symbolic links are not followed).
 Use `-F` to append indicators to entries: `/` for directories, `*` for executables and `@` for symbolic links.
+Use `-h` to display file sizes in human readable units when combined with `-l`.
 
 Example showing inode numbers and long format:
 
