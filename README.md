@@ -69,17 +69,33 @@ make CFLAGS="-O2"
 
 The resulting executable is placed in `build/vls`.
 
+## Installation
+Install the program and its manual page to `/usr/local` with:
+
+```sh
+sudo make install
+```
+
+Use the variable `PREFIX` to choose a different destination:
+
+```sh
+sudo make install PREFIX=/opt
+```
+
+To remove the installed files run:
+
+```sh
+sudo make uninstall PREFIX=/opt
+```
+
 
 ## Man Page
-A manual page is included in `man/vls.1`. View it directly with:
+The manual page is included in `man/vls.1` and installed alongside the
+program. View it directly with:
 
 ```sh
 man ./man/vls.1
 ```
 
-To install it system‑wide copy the file to your local man directory, e.g.:
-
-```sh
-sudo cp man/vls.1 /usr/local/share/man/man1/
-```
-Then run `mandb` or your system's equivalent to update the man page index.
+After installation run `mandb` or your system's equivalent to update the
+man page index if necessary.
