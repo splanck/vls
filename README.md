@@ -20,6 +20,7 @@ Use `-L` to follow symbolic links when retrieving file details (the default is t
 Use `-n` to show numeric user and group IDs in long-format output.
 Use `-g` to omit owner names in long format.
 Use `-o` to omit group names in long format.
+Use `-B` or `--ignore-backups` to skip entries ending with '~'.
 You may specify one or more paths to list. When multiple targets are given,
 `vls` prints a heading before each listing just like `ls`.
 

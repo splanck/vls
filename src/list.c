@@ -79,7 +79,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only) {
+void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups) {
     if (list_dirs_only) {
         struct stat st;
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
@@ -196,6 +196,11 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             continue;
         if (almost_all && (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0))
             continue;
+        if (ignore_backups) {
+            size_t len = strlen(entry->d_name);
+            if (len > 0 && entry->d_name[len - 1] == '~')
+                continue;
+        }
         if (count == capacity) {
             capacity *= 2;
             Entry *tmp = realloc(entries, capacity * sizeof(Entry));
@@ -362,7 +367,7 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only);
+            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups);
         }
     }
 
