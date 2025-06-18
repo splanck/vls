@@ -79,7 +79,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int human_readable, int numeric_ids, int follow_links, int list_dirs_only) {
+void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only) {
     if (list_dirs_only) {
         struct stat st;
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
@@ -153,19 +153,15 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
 
             if (show_inode)
-                printf("%10llu %s 1 %-*s %-*s %*s %s %s%s%s%s\n",
-                       (unsigned long long)st.st_ino, perms,
-                       (int)strlen(owner_buf), owner_buf,
-                       (int)strlen(group_buf), group_buf,
-                       (int)strlen(size_buf), size_buf,
-                       time_buf, prefix, path, suffix, indicator);
-            else
-                printf("%s 1 %-*s %-*s %*s %s %s%s%s%s\n",
-                       perms,
-                       (int)strlen(owner_buf), owner_buf,
-                       (int)strlen(group_buf), group_buf,
-                       (int)strlen(size_buf), size_buf,
-                       time_buf, prefix, path, suffix, indicator);
+                printf("%10llu ", (unsigned long long)st.st_ino);
+            printf("%s 1 ", perms);
+            if (!hide_owner)
+                printf("%-*s ", (int)strlen(owner_buf), owner_buf);
+            if (!hide_group)
+                printf("%-*s ", (int)strlen(group_buf), group_buf);
+            printf("%*s %s %s%s%s%s\n",
+                   (int)strlen(size_buf), size_buf,
+                   time_buf, prefix, path, suffix, indicator);
         } else {
             if (show_inode)
                 printf("%10llu %s%s%s%s\n", (unsigned long long)st.st_ino, prefix, path, suffix, indicator);
@@ -236,18 +232,23 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
     if (long_format) {
         for (size_t i = 0; i < count; i++) {
             const Entry *ent = &entries[i];
+            size_t len;
             if (num_digits(ent->st.st_nlink) > link_w)
                 link_w = num_digits(ent->st.st_nlink);
 
-            struct passwd *pw = numeric_ids ? NULL : getpwuid(ent->st.st_uid);
-            size_t len = pw ? strlen(pw->pw_name) : num_digits(ent->st.st_uid);
-            if (len > owner_w)
-                owner_w = len;
+            if (!hide_owner) {
+                struct passwd *pw = numeric_ids ? NULL : getpwuid(ent->st.st_uid);
+                size_t len = pw ? strlen(pw->pw_name) : num_digits(ent->st.st_uid);
+                if (len > owner_w)
+                    owner_w = len;
+            }
 
-            struct group *gr = numeric_ids ? NULL : getgrgid(ent->st.st_gid);
-            len = gr ? strlen(gr->gr_name) : num_digits(ent->st.st_gid);
-            if (len > group_w)
-                group_w = len;
+            if (!hide_group) {
+                struct group *gr = numeric_ids ? NULL : getgrgid(ent->st.st_gid);
+                size_t len = gr ? strlen(gr->gr_name) : num_digits(ent->st.st_gid);
+                if (len > group_w)
+                    group_w = len;
+            }
 
             char sz[16];
             if (human_readable)
@@ -329,21 +330,15 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
 
             if (show_inode)
-                printf("%10llu %s %*lu %-*s %-*s %*s %s %s%s%s%s\n",
-                       (unsigned long long)ent->st.st_ino, perms,
-                       (int)link_w, (unsigned long)ent->st.st_nlink,
-                       (int)owner_w, owner_buf,
-                       (int)group_w, group_buf,
-                       (int)size_w, size_buf,
-                       time_buf, prefix, ent->name, suffix, indicator);
-            else
-                printf("%s %*lu %-*s %-*s %*s %s %s%s%s%s\n",
-                       perms,
-                       (int)link_w, (unsigned long)ent->st.st_nlink,
-                       (int)owner_w, owner_buf,
-                       (int)group_w, group_buf,
-                       (int)size_w, size_buf,
-                       time_buf, prefix, ent->name, suffix, indicator);
+                printf("%10llu ", (unsigned long long)ent->st.st_ino);
+            printf("%s %*lu ", perms, (int)link_w, (unsigned long)ent->st.st_nlink);
+            if (!hide_owner)
+                printf("%-*s ", (int)owner_w, owner_buf);
+            if (!hide_group)
+                printf("%-*s ", (int)group_w, group_buf);
+            printf("%*s %s %s%s%s%s\n",
+                   (int)size_w, size_buf,
+                   time_buf, prefix, ent->name, suffix, indicator);
         } else {
             if (show_inode)
                 printf("%10llu %s%s%s%s\n", (unsigned long long)ent->st.st_ino, prefix, ent->name, suffix, indicator);
@@ -363,7 +358,7 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, human_readable, numeric_ids, follow_links, list_dirs_only);
+            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only);
         }
     }
 

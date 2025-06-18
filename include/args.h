@@ -20,6 +20,8 @@ typedef struct {
     int follow_links;
     int human_readable;
     int numeric_ids;
+    int hide_owner;
+    int hide_group;
     int classify;
 } Args;
 
