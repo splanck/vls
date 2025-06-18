@@ -8,9 +8,9 @@ vls \- colorized ls replacement
 .B vls
 is a minimal utility that lists directory contents similarly to
 .BR ls (1).
-File names are colorized by default. Use
-.BR --no-color
- to disable colors.
+File names are colorized by default. The option
+.BR --color=WHEN
+controls coloring where WHEN is \fIauto\fP, \fIalways\fP or \fInever\fP.
 Default behavior is to display information about symbolic links. Use
 .BR -L
 to follow them.
@@ -74,8 +74,8 @@ Omit the group column in long format output.
 .BR -B , --ignore-backups
 Do not list files ending with '~'.
 .TP
-.BR --no-color
-Disable colored output.
+.BR --color=WHEN
+Control colorization. WHEN is \fIauto\fP, \fIalways\fP or \fInever\fP.
 .TP
 .BR --help
 Display a brief usage message and exit.
@@ -90,7 +90,7 @@ List all files in long format.
 .B vls -tR /etc
 Recursively list /etc sorted by modification time.
 .TP
-.B vls --no-color
+.B vls --color=never
 List current directory without colorization.
 .SH SEE ALSO
 .BR ls (1)

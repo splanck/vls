@@ -79,7 +79,12 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups) {
+    int use_color = 0;
+    if (color_mode == COLOR_ALWAYS)
+        use_color = 1;
+    else if (color_mode == COLOR_AUTO)
+        use_color = isatty(STDOUT_FILENO);
     if (list_dirs_only) {
         struct stat st;
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
@@ -367,7 +372,7 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups);
         }
     }
 

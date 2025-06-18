@@ -4,7 +4,8 @@ ls replacement utility for UNIX
 vls is a minimal tool intended as a replacement for the standard `ls` command.
 
 File names are colorized based on type (directories, links and executables).
-Pass `--no-color` to disable colored output.
+Use `--color=WHEN` to control coloring where `WHEN` is `auto`, `always` or `never`.
+Color definitions respect the `LS_COLORS` environment variable when set.
 Use `-r` to display entries in reverse alphabetical order.
 Use `-t` to sort entries by modification time.
 Use `-u` to sort entries by access time. With `-l`, access time is shown.
