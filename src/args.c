@@ -13,16 +13,17 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->reverse = 0;
     args->recursive = 0;
     args->classify = 0;
+    args->human_readable = 0;
     args->path = ".";
 
     static struct option long_options[] = {
         {"no-color", no_argument, 0, 'C'},
-        {"help", no_argument, 0, 'h'},
+        {"help", no_argument, 0, 1},
         {0, 0, 0, 0}
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "ialtrSChRF", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "ialtrSChRFh", long_options, NULL)) != -1) {
         switch (opt) {
         case 'a':
             args->show_hidden = 1;
@@ -48,15 +49,18 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'F':
             args->classify = 1;
             break;
+        case 'h':
+            args->human_readable = 1;
+            break;
         case 'C':
             args->use_color = 0;
             break;
-        case 'h':
-            printf("Usage: %s [-a] [-l] [-i] [-t] [-S] [-r] [-R] [-F] [--no-color] [path]\n", argv[0]);
+        case 1:
+            printf("Usage: %s [-a] [-l] [-i] [-t] [-S] [-r] [-R] [-F] [-h] [--no-color] [--help] [path]\n", argv[0]);
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-l] [-i] [-t] [-S] [-r] [-R] [-F] [--no-color] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-l] [-i] [-t] [-S] [-r] [-R] [-F] [-h] [--no-color] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }
