@@ -71,7 +71,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int long_format, int show_inode, int sort_time, int sort_size, int reverse, int recursive, int classify, int human_readable, int follow_links) {
+void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_size, int reverse, int recursive, int classify, int human_readable, int follow_links) {
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
@@ -92,6 +92,8 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
 
     while ((entry = readdir(dir)) != NULL) {
         if (!show_hidden && entry->d_name[0] == '.')
+            continue;
+        if (almost_all && (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0))
             continue;
         if (count == capacity) {
             capacity *= 2;
@@ -256,7 +258,7 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, use_color, show_hidden, long_format, show_inode, sort_time, sort_size, reverse, recursive, classify, human_readable, follow_links);
+            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_size, reverse, recursive, classify, human_readable, follow_links);
         }
     }
 

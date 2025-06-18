@@ -8,6 +8,7 @@ typedef struct {
     size_t path_count;
     int use_color;
     int show_hidden;
+    int almost_all;
     int long_format;
     int show_inode;
     int sort_time;
