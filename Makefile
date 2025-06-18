@@ -1,5 +1,15 @@
-CC = cc
-CFLAGS = -Wall -Wextra -std=c99 -Iinclude
+CC ?= cc
+CFLAGS ?= -Wall -Wextra -std=c99 -Iinclude
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    PLATFORM_CFLAGS = -D_DARWIN_C_SOURCE
+else ifeq ($(UNAME_S),NetBSD)
+    PLATFORM_CFLAGS = -D_NETBSD_SOURCE
+else ifeq ($(UNAME_S),Linux)
+    PLATFORM_CFLAGS = -D_GNU_SOURCE
+endif
+CFLAGS += $(PLATFORM_CFLAGS)
 OBJS = build/main.o build/list.o build/color.o build/args.o
 DEPS = include/list.h include/color.h include/args.h
 
