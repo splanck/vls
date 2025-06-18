@@ -6,6 +6,7 @@ typedef struct {
     int use_color;
     int show_hidden;
     int long_format;
+    int reverse;
 } Args;
 
 void parse_args(int argc, char *argv[], Args *args);

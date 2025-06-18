@@ -9,6 +9,6 @@ int main(int argc, char *argv[]) {
     parse_args(argc, argv, &args);
 
     printf("vls %s\n", VLS_VERSION);
-    list_directory(args.path, args.use_color, args.show_hidden, args.long_format);
+    list_directory(args.path, args.use_color, args.show_hidden, args.long_format, args.reverse);
     return 0;
 }
