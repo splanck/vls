@@ -5,7 +5,15 @@
 #include <string.h>
 #include <limits.h>
 #include <unistd.h>
-#include <linux/limits.h>
+#if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
+# include <sys/param.h>
+# ifndef PATH_MAX
+#  define PATH_MAX MAXPATHLEN
+# endif
+#endif
+#ifndef PATH_MAX
+# define PATH_MAX 4096
+#endif
 #include "list.h"
 #include "color.h"
 
