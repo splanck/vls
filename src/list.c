@@ -79,7 +79,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int human_readable, int follow_links, int list_dirs_only) {
+void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int human_readable, int numeric_ids, int follow_links, int list_dirs_only) {
     if (list_dirs_only) {
         struct stat st;
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
@@ -116,14 +116,14 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             else
                 snprintf(size_buf, sizeof(size_buf), "%lld", (long long)st.st_size);
 
-            struct passwd *pw = getpwuid(st.st_uid);
+            struct passwd *pw = numeric_ids ? NULL : getpwuid(st.st_uid);
             char owner_buf[32];
             if (pw)
                 snprintf(owner_buf, sizeof(owner_buf), "%s", pw->pw_name);
             else
                 snprintf(owner_buf, sizeof(owner_buf), "%u", st.st_uid);
 
-            struct group *gr = getgrgid(st.st_gid);
+            struct group *gr = numeric_ids ? NULL : getgrgid(st.st_gid);
             char group_buf[32];
             if (gr)
                 snprintf(group_buf, sizeof(group_buf), "%s", gr->gr_name);
@@ -239,12 +239,12 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             if (num_digits(ent->st.st_nlink) > link_w)
                 link_w = num_digits(ent->st.st_nlink);
 
-            struct passwd *pw = getpwuid(ent->st.st_uid);
+            struct passwd *pw = numeric_ids ? NULL : getpwuid(ent->st.st_uid);
             size_t len = pw ? strlen(pw->pw_name) : num_digits(ent->st.st_uid);
             if (len > owner_w)
                 owner_w = len;
 
-            struct group *gr = getgrgid(ent->st.st_gid);
+            struct group *gr = numeric_ids ? NULL : getgrgid(ent->st.st_gid);
             len = gr ? strlen(gr->gr_name) : num_digits(ent->st.st_gid);
             if (len > group_w)
                 group_w = len;
@@ -292,14 +292,14 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             else
                 snprintf(size_buf, sizeof(size_buf), "%lld", (long long)ent->st.st_size);
 
-            struct passwd *pw = getpwuid(ent->st.st_uid);
+            struct passwd *pw = numeric_ids ? NULL : getpwuid(ent->st.st_uid);
             char owner_buf[32];
             if (pw)
                 snprintf(owner_buf, sizeof(owner_buf), "%s", pw->pw_name);
             else
                 snprintf(owner_buf, sizeof(owner_buf), "%u", ent->st.st_uid);
 
-            struct group *gr = getgrgid(ent->st.st_gid);
+            struct group *gr = numeric_ids ? NULL : getgrgid(ent->st.st_gid);
             char group_buf[32];
             if (gr)
                 snprintf(group_buf, sizeof(group_buf), "%s", gr->gr_name);
@@ -363,7 +363,7 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, human_readable, follow_links, list_dirs_only);
+            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, human_readable, numeric_ids, follow_links, list_dirs_only);
         }
     }
 
