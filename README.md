@@ -6,6 +6,7 @@ vls is a minimal tool intended as a replacement for the standard `ls` command.
 File names are colorized based on type (directories, links and executables).
 Pass `--no-color` to disable colored output.
 Use `-r` to display entries in reverse alphabetical order.
+Use `-t` to sort entries by modification time.
 
 ## Building and Testing
 The build system uses a simple Makefile which detects the host OS with
