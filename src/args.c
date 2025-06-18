@@ -8,6 +8,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->show_hidden = 0;
     args->long_format = 0;
     args->sort_time = 0;
+    args->sort_size = 0;
     args->reverse = 0;
     args->path = ".";
 
@@ -18,7 +19,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "altrCh", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "altrSCh", long_options, NULL)) != -1) {
         switch (opt) {
         case 'a':
             args->show_hidden = 1;
@@ -29,6 +30,9 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 't':
             args->sort_time = 1;
             break;
+        case 'S':
+            args->sort_size = 1;
+            break;
         case 'r':
             args->reverse = 1;
             break;
@@ -36,11 +40,11 @@ void parse_args(int argc, char *argv[], Args *args) {
             args->use_color = 0;
             break;
         case 'h':
-            printf("Usage: %s [-a] [-l] [-t] [-r] [--no-color] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-l] [-t] [-S] [-r] [--no-color] [path]\n", argv[0]);
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-l] [-t] [-r] [--no-color] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-l] [-t] [-S] [-r] [--no-color] [path]\n", argv[0]);
             exit(1);
         }
     }

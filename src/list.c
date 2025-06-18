@@ -37,7 +37,15 @@ static int cmp_mtime(const void *a, const void *b) {
     return (ea->st.st_mtime > eb->st.st_mtime) ? -1 : 1;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int long_format, int sort_time, int reverse) {
+static int cmp_size(const void *a, const void *b) {
+    const Entry *ea = a;
+    const Entry *eb = b;
+    if (ea->st.st_size == eb->st.st_size)
+        return 0;
+    return (ea->st.st_size > eb->st.st_size) ? -1 : 1;
+}
+
+void list_directory(const char *path, int use_color, int show_hidden, int long_format, int sort_time, int sort_size, int reverse) {
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
@@ -80,7 +88,12 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
         count++;
     }
 
-    qsort(entries, count, sizeof(Entry), sort_time ? cmp_mtime : cmp_names);
+    int (*cmp)(const void *, const void *) = cmp_names;
+    if (sort_size)
+        cmp = cmp_size;
+    else if (sort_time)
+        cmp = cmp_mtime;
+    qsort(entries, count, sizeof(Entry), cmp);
 
     for (size_t i = 0; i < count; i++) {
         size_t idx = reverse ? count - 1 - i : i;
