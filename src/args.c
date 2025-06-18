@@ -3,6 +3,7 @@
 #include <getopt.h>
 #include "args.h"
 #include <string.h>
+#include <unistd.h>
 
 void parse_args(int argc, char *argv[], Args *args) {
     args->color_mode = COLOR_AUTO;
@@ -24,6 +25,8 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->hide_owner = 0;
     args->hide_group = 0;
     args->ignore_backups = 0;
+    args->columns = isatty(STDOUT_FILENO);
+    args->one_per_line = 0;
     args->paths = NULL;
     args->path_count = 0;
 
@@ -36,7 +39,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtruShRFpBhLdgon", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtruShRFpBhLdgonC1", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -77,6 +80,12 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'F':
             args->classify = 1;
             break;
+        case 'C':
+            args->columns = 1;
+            break;
+        case '1':
+            args->one_per_line = 1;
+            break;
         case 'L':
             args->follow_links = 1;
             break;
@@ -105,12 +114,12 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }

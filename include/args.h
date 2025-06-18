@@ -31,6 +31,8 @@ typedef struct {
     int classify;
     int slash_dirs;
     int ignore_backups;
+    int columns;
+    int one_per_line;
 } Args;
 
 void parse_args(int argc, char *argv[], Args *args);

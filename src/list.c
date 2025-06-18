@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/ioctl.h>
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
@@ -79,7 +80,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -241,6 +242,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
     qsort(entries, count, sizeof(Entry), cmp);
 
     size_t link_w = 0, owner_w = 0, group_w = 0, size_w = 0;
+    size_t max_len = 0;
     if (long_format) {
         for (size_t i = 0; i < count; i++) {
             const Entry *ent = &entries[i];
@@ -274,6 +276,71 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
     }
 
     for (size_t i = 0; i < count; i++) {
+        const Entry *ent = &entries[i];
+        size_t len = strlen(ent->name);
+        if (show_inode)
+            len += num_digits(ent->st.st_ino) + 1;
+        if (classify) {
+            if (S_ISDIR(ent->st.st_mode) || (ent->st.st_mode & S_IXUSR) || S_ISLNK(ent->st.st_mode))
+                len += 1;
+        } else if (slash_dirs && S_ISDIR(ent->st.st_mode)) {
+            len += 1;
+        }
+        if (len > max_len)
+            max_len = len;
+    }
+
+    if (!long_format && columns && !one_per_line) {
+        int term_width = 80;
+        struct winsize ws;
+        if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0)
+            term_width = ws.ws_col;
+        size_t col_width = max_len + 2;
+        size_t cols = term_width / (int)col_width;
+        if (cols == 0)
+            cols = 1;
+        for (size_t i = 0; i < count; i++) {
+            size_t idx = reverse ? count - 1 - i : i;
+            const Entry *ent = &entries[idx];
+
+            const char *prefix = "";
+            const char *suffix = "";
+            const char *indicator = "";
+            if (use_color) {
+                if (S_ISDIR(ent->st.st_mode))
+                    prefix = color_dir();
+                else if (S_ISLNK(ent->st.st_mode))
+                    prefix = color_link();
+                else if (ent->st.st_mode & S_IXUSR)
+                    prefix = color_exec();
+                suffix = color_reset();
+            }
+            if (classify) {
+                if (S_ISDIR(ent->st.st_mode))
+                    indicator = "/";
+                else if (S_ISLNK(ent->st.st_mode))
+                    indicator = "@";
+                else if (ent->st.st_mode & S_IXUSR)
+                    indicator = "*";
+            } else if (slash_dirs && S_ISDIR(ent->st.st_mode)) {
+                indicator = "/";
+            }
+
+            char inode_buf[32] = "";
+            if (show_inode)
+                snprintf(inode_buf, sizeof(inode_buf), "%10llu ", (unsigned long long)ent->st.st_ino);
+            printf("%s%s%s%s%s", inode_buf, prefix, ent->name, suffix, indicator);
+
+            size_t len = strlen(ent->name) + strlen(indicator) + strlen(inode_buf);
+            if ((i % cols == cols - 1) || i == count - 1) {
+                putchar('\n');
+            } else {
+                for (size_t sp = len; sp < col_width; sp++)
+                    putchar(' ');
+            }
+        }
+    } else {
+    for (size_t i = 0; i < count; i++) {
         size_t idx = reverse ? count - 1 - i : i;
         const Entry *ent = &entries[idx];
 
@@ -300,7 +367,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             indicator = "/";
         }
 
-        if (long_format) {
+        if (long_format || one_per_line || !columns) {
             char size_buf[16];
             if (human_readable)
                 human_size(ent->st.st_size, size_buf, sizeof(size_buf));
@@ -361,6 +428,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         }
     }
 
+    }
+
     if (recursive) {
         for (size_t i = 0; i < count; i++) {
             size_t idx = reverse ? count - 1 - i : i;
@@ -372,7 +441,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line);
         }
     }
 
