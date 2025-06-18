@@ -7,6 +7,7 @@ typedef struct {
     int show_hidden;
     int long_format;
     int sort_time;
+    int sort_size;
     int reverse;
 } Args;
 
