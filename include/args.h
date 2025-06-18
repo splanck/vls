@@ -3,10 +3,16 @@
 
 #include <stddef.h>
 
+typedef enum {
+    COLOR_NEVER,
+    COLOR_ALWAYS,
+    COLOR_AUTO
+} ColorMode;
+
 typedef struct {
     const char **paths;
     size_t path_count;
-    int use_color;
+    ColorMode color_mode;
     int show_hidden;
     int almost_all;
     int long_format;

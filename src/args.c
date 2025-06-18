@@ -5,7 +5,7 @@
 #include <string.h>
 
 void parse_args(int argc, char *argv[], Args *args) {
-    args->use_color = 1;
+    args->color_mode = COLOR_AUTO;
     args->show_hidden = 0;
     args->almost_all = 0;
     args->long_format = 0;
@@ -28,7 +28,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->path_count = 0;
 
     static struct option long_options[] = {
-        {"no-color", no_argument, 0, 'C'},
+        {"color", required_argument, 0, 2},
         {"almost-all", no_argument, 0, 'A'},
         {"ignore-backups", no_argument, 0, 'B'},
         {"help", no_argument, 0, 1},
@@ -36,7 +36,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtruSChRFpBhLdgon", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtruShRFpBhLdgon", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -92,16 +92,25 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'n':
             args->numeric_ids = 1;
             break;
-        case 'C':
-            args->use_color = 0;
+        case 2:
+            if (strcmp(optarg, "always") == 0)
+                args->color_mode = COLOR_ALWAYS;
+            else if (strcmp(optarg, "auto") == 0)
+                args->color_mode = COLOR_AUTO;
+            else if (strcmp(optarg, "never") == 0)
+                args->color_mode = COLOR_NEVER;
+            else {
+                fprintf(stderr, "Invalid argument for --color: %s\n", optarg);
+                exit(1);
+            }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-h] [-n] [-g] [-o] [--no-color] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }

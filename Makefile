@@ -39,7 +39,7 @@ build:
 test: build/vls
 	./build/vls -a > /dev/null
 	./build/vls -l > /dev/null
-	./build/vls --no-color > /dev/null
+	./build/vls --color=never > /dev/null
 	@echo "Tests completed"
 
 install: build/vls
