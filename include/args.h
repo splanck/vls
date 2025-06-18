@@ -6,6 +6,7 @@ typedef struct {
     int use_color;
     int show_hidden;
     int long_format;
+    int show_inode;
     int sort_time;
     int sort_size;
     int reverse;

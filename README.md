@@ -8,7 +8,14 @@ Pass `--no-color` to disable colored output.
 Use `-r` to display entries in reverse alphabetical order.
 Use `-t` to sort entries by modification time.
 Use `-S` to sort entries by file size.
+Use `-i` to display inode numbers.
 Use `-R` to recursively list subdirectories (symbolic links are not followed).
+
+Example showing inode numbers and long format:
+
+```sh
+./build/vls -li
+```
 
 ## Building and Testing
 The build system uses a simple Makefile which detects the host OS with
