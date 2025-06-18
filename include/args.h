@@ -9,6 +9,7 @@ typedef struct {
     int sort_time;
     int sort_size;
     int reverse;
+    int recursive;
 } Args;
 
 void parse_args(int argc, char *argv[], Args *args);

@@ -45,12 +45,15 @@ static int cmp_size(const void *a, const void *b) {
     return (ea->st.st_size > eb->st.st_size) ? -1 : 1;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int long_format, int sort_time, int sort_size, int reverse) {
+void list_directory(const char *path, int use_color, int show_hidden, int long_format, int sort_time, int sort_size, int reverse, int recursive) {
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
         return;
     }
+
+    if (recursive)
+        printf("%s:\n", path);
 
     struct dirent *entry;
     size_t count = 0, capacity = 32;
@@ -115,6 +118,21 @@ void list_directory(const char *path, int use_color, int show_hidden, int long_f
             printf("%s%10lld %s%s\n", prefix, (long long)ent->st.st_size, ent->name, suffix);
         else
             printf("%s%s%s\n", prefix, ent->name, suffix);
+    }
+
+    if (recursive) {
+        for (size_t i = 0; i < count; i++) {
+            size_t idx = reverse ? count - 1 - i : i;
+            const Entry *ent = &entries[idx];
+            if (!S_ISDIR(ent->st.st_mode) || S_ISLNK(ent->st.st_mode))
+                continue;
+            if (strcmp(ent->name, ".") == 0 || strcmp(ent->name, "..") == 0)
+                continue;
+            char fullpath[PATH_MAX];
+            snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
+            printf("\n");
+            list_directory(fullpath, use_color, show_hidden, long_format, sort_time, sort_size, reverse, recursive);
+        }
     }
 
 cleanup:
