@@ -68,3 +68,17 @@ make CFLAGS="-O2"
 
 The resulting executable is placed in `build/vls`.
 
+
+## Man Page
+A manual page is included in `man/vls.1`. View it directly with:
+
+```sh
+man ./man/vls.1
+```
+
+To install it system‑wide copy the file to your local man directory, e.g.:
+
+```sh
+sudo cp man/vls.1 /usr/local/share/man/man1/
+```
+Then run `mandb` or your system's equivalent to update the man page index.
