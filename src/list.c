@@ -79,7 +79,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only) {
+void list_directory(const char *path, int use_color, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only) {
     if (list_dirs_only) {
         struct stat st;
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
@@ -107,6 +107,8 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
                 indicator = "@";
             else if (st.st_mode & S_IXUSR)
                 indicator = "*";
+        } else if (slash_dirs && S_ISDIR(st.st_mode)) {
+            indicator = "/";
         }
 
         if (long_format) {
@@ -284,6 +286,8 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
                 indicator = "@";
             else if (ent->st.st_mode & S_IXUSR)
                 indicator = "*";
+        } else if (slash_dirs && S_ISDIR(ent->st.st_mode)) {
+            indicator = "/";
         }
 
         if (long_format) {
@@ -358,7 +362,7 @@ void list_directory(const char *path, int use_color, int show_hidden, int almost
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only);
+            list_directory(fullpath, use_color, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only);
         }
     }
 

@@ -23,6 +23,7 @@ typedef struct {
     int hide_owner;
     int hide_group;
     int classify;
+    int slash_dirs;
 } Args;
 
 void parse_args(int argc, char *argv[], Args *args);
