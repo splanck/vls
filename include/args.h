@@ -1,8 +1,11 @@
 #ifndef ARGS_H
 #define ARGS_H
 
+#include <stddef.h>
+
 typedef struct {
-    const char *path;
+    const char **paths;
+    size_t path_count;
     int use_color;
     int show_hidden;
     int long_format;
