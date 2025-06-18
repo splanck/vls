@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include "args.h"
+#include <string.h>
 
 void parse_args(int argc, char *argv[], Args *args) {
     args->use_color = 1;
@@ -15,7 +16,8 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->classify = 0;
     args->follow_links = 0;
     args->human_readable = 0;
-    args->path = ".";
+    args->paths = NULL;
+    args->path_count = 0;
 
     static struct option long_options[] = {
         {"no-color", no_argument, 0, 'C'},
@@ -70,6 +72,22 @@ void parse_args(int argc, char *argv[], Args *args) {
         }
     }
 
-    if (optind < argc)
-        args->path = argv[optind];
+    if (optind < argc) {
+        args->path_count = (size_t)(argc - optind);
+        args->paths = malloc(args->path_count * sizeof(const char *));
+        if (!args->paths) {
+            perror("malloc");
+            exit(1);
+        }
+        for (size_t i = 0; i < args->path_count; i++)
+            args->paths[i] = argv[optind + i];
+    } else {
+        args->path_count = 1;
+        args->paths = malloc(sizeof(const char *));
+        if (!args->paths) {
+            perror("malloc");
+            exit(1);
+        }
+        args->paths[0] = ".";
+    }
 }
