@@ -22,6 +22,7 @@ Use `-n` to show numeric user and group IDs in long-format output.
 Use `-g` to omit owner names in long format.
 Use `-o` to omit group names in long format.
 Use `-B` or `--ignore-backups` to skip entries ending with '~'.
+Use `-C` to display entries in columns and `-1` to list one per line.
 You may specify one or more paths to list. When multiple targets are given,
 `vls` prints a heading before each listing just like `ls`.
 
