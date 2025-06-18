@@ -11,6 +11,7 @@ typedef struct {
     int sort_size;
     int reverse;
     int recursive;
+    int classify;
 } Args;
 
 void parse_args(int argc, char *argv[], Args *args);
