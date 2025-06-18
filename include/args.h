@@ -19,6 +19,7 @@ typedef struct {
     int list_dirs_only;
     int follow_links;
     int human_readable;
+    int numeric_ids;
     int classify;
 } Args;
 
