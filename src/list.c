@@ -9,7 +9,7 @@
 #include "list.h"
 #include "color.h"
 
-void list_directory(const char *path, int use_color) {
+void list_directory(const char *path, int use_color, int show_hidden, int long_format) {
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
@@ -19,6 +19,9 @@ void list_directory(const char *path, int use_color) {
     struct dirent *entry;
     char fullpath[PATH_MAX];
     while ((entry = readdir(dir)) != NULL) {
+        if (!show_hidden && entry->d_name[0] == '.')
+            continue;
+
         snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entry->d_name);
         struct stat st;
         if (lstat(fullpath, &st) == -1) {
@@ -37,7 +40,11 @@ void list_directory(const char *path, int use_color) {
                 prefix = color_exec();
             suffix = color_reset();
         }
-        printf("%s%s%s\n", prefix, entry->d_name, suffix);
+
+        if (long_format)
+            printf("%s%10lld %s%s\n", prefix, (long long)st.st_size, entry->d_name, suffix);
+        else
+            printf("%s%s%s\n", prefix, entry->d_name, suffix);
     }
 
     closedir(dir);
