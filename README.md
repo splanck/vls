@@ -7,6 +7,7 @@ File names are colorized based on type (directories, links and executables).
 Pass `--no-color` to disable colored output.
 Use `-r` to display entries in reverse alphabetical order.
 Use `-t` to sort entries by modification time.
+Use `-u` to sort entries by access time. With `-l`, access time is shown.
 Use `-S` to sort entries by file size.
 Use `-i` to display inode numbers.
 Use `-A` or `--almost-all` to show hidden entries except `.` and `..`.

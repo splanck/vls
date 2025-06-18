@@ -12,6 +12,7 @@ typedef struct {
     int long_format;
     int show_inode;
     int sort_time;
+    int sort_atime;
     int sort_size;
     int reverse;
     int recursive;
