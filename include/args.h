@@ -20,6 +20,7 @@ typedef struct {
     int sort_time;
     int sort_atime;
     int sort_size;
+    int sort_extension;
     int unsorted;
     int reverse;
     int recursive;
