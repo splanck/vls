@@ -63,6 +63,49 @@ typedef struct {
     struct stat st;
 } Entry;
 
+typedef struct Visited {
+    dev_t dev;
+    ino_t ino;
+    struct Visited *next;
+} Visited;
+
+static Visited *visited_head = NULL;
+static int recursion_depth = 0;
+
+static int visited_contains(dev_t dev, ino_t ino) {
+    for (Visited *v = visited_head; v; v = v->next)
+        if (v->dev == dev && v->ino == ino)
+            return 1;
+    return 0;
+}
+
+static int visited_add(dev_t dev, ino_t ino) {
+    Visited *v = malloc(sizeof(Visited));
+    if (!v)
+        return -1;
+    v->dev = dev;
+    v->ino = ino;
+    v->next = visited_head;
+    visited_head = v;
+    return 0;
+}
+
+static void visited_free_all(void) {
+    Visited *v = visited_head;
+    while (v) {
+        Visited *tmp = v->next;
+        free(v);
+        v = tmp;
+    }
+    visited_head = NULL;
+}
+
+#define FINALIZE() do {                         \
+    recursion_depth--;                           \
+    if (recursion_depth == 0)                    \
+        visited_free_all();                      \
+} while (0)
+
 static int cmp_names(const void *a, const void *b) {
     const Entry *ea = a;
     const Entry *eb = b;
@@ -205,6 +248,22 @@ static size_t escaped_len(const char *s, int hide_control) {
 
 
 void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperlink_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, const char *sort_word, int unsorted, int reverse, int dirs_first, int recursive, IndicatorStyle indicator_style, int human_readable, int human_si, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, const char **hide_patterns, size_t hide_count, int columns, int across_columns, int one_per_line, int comma_separated, int output_width, int tabsize, int show_blocks, QuotingStyle quoting_style, const char *time_word, const char *time_style, unsigned block_size, int hide_control, int show_controls, int literal_names) {
+    recursion_depth++;
+    if (follow_links) {
+        struct stat vst;
+        if (stat(path, &vst) == 0) {
+            if (visited_contains(vst.st_dev, vst.st_ino)) {
+                fprintf(stderr, "warning: skipping cyclic directory '%s'\n", path);
+                FINALIZE();
+                return;
+            }
+            if (visited_add(vst.st_dev, vst.st_ino) == -1) {
+                perror("malloc");
+                FINALIZE();
+                return;
+            }
+        }
+    }
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -229,6 +288,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
     char *pwbuf = malloc(pw_bufsz);
     if (!pwbuf) {
         perror("malloc");
+        FINALIZE();
         return;
     }
     long gr_bufsz_l = sysconf(_SC_GETGR_R_SIZE_MAX);
@@ -239,6 +299,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
     if (!grbuf) {
         perror("malloc");
         free(pwbuf);
+        FINALIZE();
         return;
     }
     if (list_dirs_only) {
@@ -248,6 +309,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             fprintf(stderr, "stat: %s: %s\n", path, strerror(errno));
             free(pwbuf);
             free(grbuf);
+            FINALIZE();
             return;
         }
 
@@ -403,6 +465,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                 printf("%s%s\n", suffix, indicator);
             }
         }
+        FINALIZE();
         return;
     }
 
@@ -411,6 +474,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
         fprintf(stderr, "opendir: %s: %s\n", path, strerror(errno));
         free(pwbuf);
         free(grbuf);
+        FINALIZE();
         return;
     }
 
@@ -429,6 +493,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
         closedir(dir);
         free(pwbuf);
         free(grbuf);
+        FINALIZE();
         return;
     }
 
@@ -1052,6 +1117,14 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                 perror("malloc");
                 goto cleanup;
             }
+            if (follow_links) {
+                struct stat vst;
+                if (stat(fullpath, &vst) == 0 && visited_contains(vst.st_dev, vst.st_ino)) {
+                    fprintf(stderr, "warning: skipping cyclic directory '%s'\n", fullpath);
+                    free(fullpath);
+                    continue;
+                }
+            }
             printf("\n");
             list_directory(fullpath, color_mode, hyperlink_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, sort_word, unsorted, reverse, dirs_first, recursive, indicator_style, human_readable, human_si, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, hide_patterns, hide_count, columns, across_columns, one_per_line, comma_separated, output_width, tabsize, show_blocks, quoting_style, time_word, time_style, block_size, hide_control, show_controls, literal_names);
             free(fullpath);
@@ -1065,4 +1138,5 @@ cleanup:
     closedir(dir);
     free(pwbuf);
     free(grbuf);
+    FINALIZE();
 }
