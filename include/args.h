@@ -23,6 +23,7 @@ typedef struct {
     int sort_size;
     int sort_extension;
     int sort_version;
+    const char *sort_word;
     int unsorted;
     int reverse;
     int dirs_first;

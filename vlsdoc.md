@@ -20,6 +20,8 @@ vls - colorized ls replacement
 - `-S` Sort by file size, largest first.
 - `-X` Sort by file extension, case-insensitive.
 - `-v` Sort by version (natural order).
+- `--sort=WORD` Choose sort field: `size`, `time`, `atime`, `ctime`,
+  `extension`, `version` or `none`.
 - `-f`, `-U` Do not sort; list entries in directory order.
 - `--group-directories-first` List directories before other files.
 - `--time-style=FMT` Format times using `strftime(3)` style FMT.
