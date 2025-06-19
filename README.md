@@ -35,6 +35,7 @@ Use `-I PATTERN` or `--ignore=PATTERN` to exclude matching entries. Repeat for m
 Use `-C` to display entries in columns and `-1` to list one per line.
 Use `-Q` or `--quote-name` to wrap file names in double quotes, escaping
 any internal quotes or backslashes.
+Use `-V` or `--version` to print the version and exit.
 You may specify one or more paths to list. When multiple targets are given,
 `vls` prints a heading before each listing just like `ls`.
 
@@ -42,7 +43,6 @@ Example of long format output:
 
 ```sh
 $ ./build/vls -l
-vls 0.1
 -rw-r--r-- 1 user group 35149 Jun 18 16:55 LICENSE
 -rw-r--r-- 1 user group  1104 Jun 18 16:55 Makefile
 -rw-r--r-- 1 user group  1512 Jun 18 16:55 README.md

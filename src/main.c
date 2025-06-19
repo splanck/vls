@@ -17,14 +17,10 @@ static void print_quoted(const char *s, int quote) {
     putchar('"');
 }
 
-#define VLS_VERSION "0.1"
-
 int main(int argc, char *argv[]) {
     Args args;
     parse_args(argc, argv, &args);
     color_init();
-
-    printf("vls %s\n", VLS_VERSION);
     for (size_t i = 0; i < args.path_count; i++) {
         const char *path = args.paths[i];
         if (!args.recursive && args.path_count > 1 && !args.list_dirs_only) {
