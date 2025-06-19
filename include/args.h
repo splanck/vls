@@ -36,6 +36,8 @@ typedef struct {
     int ignore_backups;
     int columns;
     int one_per_line;
+    int show_blocks;
+    unsigned block_size;
 } Args;
 
 void parse_args(int argc, char *argv[], Args *args);
