@@ -51,6 +51,7 @@ typedef struct {
     int show_blocks;
     int quote_names;
     int escape_nonprint;
+    const char *time_word;
     const char *time_style;
     unsigned block_size;
 } Args;

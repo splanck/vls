@@ -13,6 +13,7 @@ A minimal, colorized replacement for `ls`.
 - Options for quoting names, human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
 - Backslash-escapes for non-printable characters (`-b`)
 - Customizable timestamp format via `--time-style=FMT` and `--full-time`
+- Select which timestamp to show with `--time=WORD` (`mod`, `access`, `use`, `status`)
 - Cross‑platform Makefile for Linux, macOS and NetBSD
 
 For a complete list of options see [vlsdoc.md](./vlsdoc.md) or the manual page at [man/vls.1](./man/vls.1).
