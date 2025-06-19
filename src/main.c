@@ -5,10 +5,10 @@
 #include <sys/stat.h>
 #include <ctype.h>
 
-static void print_quoted(const char *s, QuotingStyle style) {
+static void print_quoted(const char *s, QuotingStyle style, int hide_control) {
     int quote = (style == QUOTE_C);
     int escape_nonprint = (style == QUOTE_C || style == QUOTE_ESCAPE);
-    if (!quote && !escape_nonprint) {
+    if (!quote && !escape_nonprint && !hide_control) {
         fputs(s, stdout);
         return;
     }
@@ -18,10 +18,16 @@ static void print_quoted(const char *s, QuotingStyle style) {
         unsigned char c = (unsigned char)*p;
         if (quote && (c == '"' || c == '\\'))
             putchar('\\');
-        if (escape_nonprint && !isprint(c)) {
-            char buf[5];
-            snprintf(buf, sizeof(buf), "\\%03o", c);
-            fputs(buf, stdout);
+        if (!isprint(c)) {
+            if (hide_control) {
+                putchar('?');
+            } else if (escape_nonprint) {
+                char buf[5];
+                snprintf(buf, sizeof(buf), "\\%03o", c);
+                fputs(buf, stdout);
+            } else {
+                putchar(c);
+            }
         } else {
             putchar(c);
         }
@@ -37,7 +43,7 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < args.path_count; i++) {
         const char *path = args.paths[i];
         if (!args.recursive && args.path_count > 1 && !args.list_dirs_only) {
-            print_quoted(path, args.quoting_style);
+            print_quoted(path, args.quoting_style, args.hide_control);
             printf(":\n");
         }
 
@@ -58,7 +64,7 @@ int main(int argc, char *argv[]) {
                                 args.ignore_patterns, args.ignore_count,
                                 args.hide_patterns, args.hide_count,
                                 args.columns, args.across_columns, args.one_per_line, args.comma_separated,
-                                args.show_blocks, args.quoting_style, args.time_word, args.time_style, args.block_size);
+                                args.show_blocks, args.quoting_style, args.time_word, args.time_style, args.block_size, args.hide_control);
                 if (i < args.path_count - 1)
                     printf("\n");
                 continue;
@@ -75,7 +81,7 @@ int main(int argc, char *argv[]) {
                         args.ignore_patterns, args.ignore_count,
                         args.hide_patterns, args.hide_count,
                         args.columns, args.across_columns, args.one_per_line, args.comma_separated,
-                        args.show_blocks, args.quoting_style, args.time_word, args.time_style, args.block_size);
+                        args.show_blocks, args.quoting_style, args.time_word, args.time_style, args.block_size, args.hide_control);
         if (i < args.path_count - 1)
             printf("\n");
     }
