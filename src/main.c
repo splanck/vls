@@ -34,8 +34,8 @@ int main(int argc, char *argv[]) {
                       args.numeric_ids, args.hide_owner, args.hide_group,
                       args.follow_links, args.list_dirs_only, args.ignore_backups,
                         args.ignore_patterns, args.ignore_count, args.columns,
-                        args.across_columns, args.one_per_line, args.show_blocks,
-                        args.quote_names, args.block_size);
+                        args.across_columns, args.one_per_line, args.comma_separated,
+                        args.show_blocks, args.quote_names, args.block_size);
         if (i < args.path_count - 1)
             printf("\n");
     }

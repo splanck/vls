@@ -7,7 +7,7 @@ A minimal, colorized replacement for `ls`.
 - Supports long listings and various sorting modes (time, size, extension)
 - Recursive listing and directory-first ordering
 - Pattern ignoring and indicator characters ("/", "*", "@")
-- Options for quoting names, human readable sizes and column layout (`-C`/`-x`)
+- Options for quoting names, human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
 - Cross‑platform Makefile for Linux, macOS and NetBSD
 
 For a complete list of options see [vlsdoc.md](./vlsdoc.md) or the manual page at [man/vls.1](./man/vls.1).
