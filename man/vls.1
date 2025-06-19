@@ -102,6 +102,9 @@ Append '/' to directory names.
 .B --file-type
 Like -p but ignore other indicators unless -F is given.
 .TP
+.B --indicator-style=STYLE
+Choose indicator style: none, slash, file-type or classify.
+.TP
 .BR -s
 Display the number of blocks allocated to each file.
 .br
@@ -189,5 +192,8 @@ Ignore files ending in .o
 .TP
 .B vls -b
 Escape non-printable characters with backslash codes
+.TP
+.B vls --indicator-style=classify
+Append indicator characters to entries
 .SH SEE ALSO
 .BR ls (1)

@@ -189,7 +189,7 @@ static void print_quoted(const char *s, int quote, int escape_nonprint) {
         putchar('"');
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, const char *sort_word, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int file_type_only, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, const char **hide_patterns, size_t hide_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, int escape_nonprint, const char *time_word, const char *time_style, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, const char *sort_word, int unsorted, int reverse, int dirs_first, int recursive, IndicatorStyle indicator_style, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, const char **hide_patterns, size_t hide_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, int escape_nonprint, const char *time_word, const char *time_style, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -215,15 +215,27 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                 prefix = color_exec();
             suffix = color_reset();
         }
-        if (classify) {
+        switch (indicator_style) {
+        case INDICATOR_CLASSIFY:
             if (S_ISDIR(st.st_mode))
                 indicator = "/";
             else if (S_ISLNK(st.st_mode))
                 indicator = "@";
             else if (st.st_mode & S_IXUSR)
                 indicator = "*";
-        } else if ((file_type_only || slash_dirs) && S_ISDIR(st.st_mode)) {
-            indicator = "/";
+            break;
+        case INDICATOR_FILE_TYPE:
+            if (S_ISDIR(st.st_mode))
+                indicator = "/";
+            else if (S_ISLNK(st.st_mode))
+                indicator = "@";
+            break;
+        case INDICATOR_SLASH:
+            if (S_ISDIR(st.st_mode))
+                indicator = "/";
+            break;
+        default:
+            break;
         }
 
         unsigned long single_blocks = (unsigned long)((st.st_blocks * 512 + block_size - 1) / block_size);
@@ -500,11 +512,21 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                             (escape_nonprint ? escaped_len(ent->name) : strlen(ent->name));
         if (show_inode)
             name_len += num_digits(ent->st.st_ino) + 1;
-        if (classify) {
+        switch (indicator_style) {
+        case INDICATOR_CLASSIFY:
             if (S_ISDIR(ent->st.st_mode) || (ent->st.st_mode & S_IXUSR) || S_ISLNK(ent->st.st_mode))
                 name_len += 1;
-        } else if ((file_type_only || slash_dirs) && S_ISDIR(ent->st.st_mode)) {
-            name_len += 1;
+            break;
+        case INDICATOR_FILE_TYPE:
+            if (S_ISDIR(ent->st.st_mode) || S_ISLNK(ent->st.st_mode))
+                name_len += 1;
+            break;
+        case INDICATOR_SLASH:
+            if (S_ISDIR(ent->st.st_mode))
+                name_len += 1;
+            break;
+        default:
+            break;
         }
         if (name_len > max_len)
             max_len = name_len;
@@ -539,15 +561,27 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                     prefix = color_exec();
                 suffix = color_reset();
             }
-            if (classify) {
+            switch (indicator_style) {
+            case INDICATOR_CLASSIFY:
                 if (S_ISDIR(ent->st.st_mode))
                     indicator = "/";
                 else if (S_ISLNK(ent->st.st_mode))
                     indicator = "@";
                 else if (ent->st.st_mode & S_IXUSR)
                     indicator = "*";
-            } else if ((file_type_only || slash_dirs) && S_ISDIR(ent->st.st_mode)) {
-                indicator = "/";
+                break;
+            case INDICATOR_FILE_TYPE:
+                if (S_ISDIR(ent->st.st_mode))
+                    indicator = "/";
+                else if (S_ISLNK(ent->st.st_mode))
+                    indicator = "@";
+                break;
+            case INDICATOR_SLASH:
+                if (S_ISDIR(ent->st.st_mode))
+                    indicator = "/";
+                break;
+            default:
+                break;
             }
 
             char block_buf[32] = "";
@@ -612,15 +646,27 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                     prefix = color_exec();
                 suffix = color_reset();
             }
-            if (classify) {
+            switch (indicator_style) {
+            case INDICATOR_CLASSIFY:
                 if (S_ISDIR(ent->st.st_mode))
                     indicator = "/";
                 else if (S_ISLNK(ent->st.st_mode))
                     indicator = "@";
                 else if (ent->st.st_mode & S_IXUSR)
                     indicator = "*";
-            } else if ((file_type_only || slash_dirs) && S_ISDIR(ent->st.st_mode)) {
-                indicator = "/";
+                break;
+            case INDICATOR_FILE_TYPE:
+                if (S_ISDIR(ent->st.st_mode))
+                    indicator = "/";
+                else if (S_ISLNK(ent->st.st_mode))
+                    indicator = "@";
+                break;
+            case INDICATOR_SLASH:
+                if (S_ISDIR(ent->st.st_mode))
+                    indicator = "/";
+                break;
+            default:
+                break;
             }
 
             char block_buf[32] = "";
@@ -665,15 +711,27 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                             prefix = color_exec();
                         suffix = color_reset();
                     }
-                    if (classify) {
+                    switch (indicator_style) {
+                    case INDICATOR_CLASSIFY:
                         if (S_ISDIR(ent->st.st_mode))
                             indicator = "/";
                         else if (S_ISLNK(ent->st.st_mode))
                             indicator = "@";
                         else if (ent->st.st_mode & S_IXUSR)
                             indicator = "*";
-                    } else if ((file_type_only || slash_dirs) && S_ISDIR(ent->st.st_mode)) {
-                        indicator = "/";
+                        break;
+                    case INDICATOR_FILE_TYPE:
+                        if (S_ISDIR(ent->st.st_mode))
+                            indicator = "/";
+                        else if (S_ISLNK(ent->st.st_mode))
+                            indicator = "@";
+                        break;
+                    case INDICATOR_SLASH:
+                        if (S_ISDIR(ent->st.st_mode))
+                            indicator = "/";
+                        break;
+                    default:
+                        break;
                     }
 
                     char block_buf[32] = "";
@@ -716,15 +774,27 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                 prefix = color_exec();
             suffix = color_reset();
         }
-        if (classify) {
+        switch (indicator_style) {
+        case INDICATOR_CLASSIFY:
             if (S_ISDIR(ent->st.st_mode))
                 indicator = "/";
             else if (S_ISLNK(ent->st.st_mode))
                 indicator = "@";
             else if (ent->st.st_mode & S_IXUSR)
                 indicator = "*";
-        } else if ((file_type_only || slash_dirs) && S_ISDIR(ent->st.st_mode)) {
-            indicator = "/";
+            break;
+        case INDICATOR_FILE_TYPE:
+            if (S_ISDIR(ent->st.st_mode))
+                indicator = "/";
+            else if (S_ISLNK(ent->st.st_mode))
+                indicator = "@";
+            break;
+        case INDICATOR_SLASH:
+            if (S_ISDIR(ent->st.st_mode))
+                indicator = "/";
+            break;
+        default:
+            break;
         }
 
         if (long_format || one_per_line || !columns) {
@@ -838,7 +908,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, sort_word, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, file_type_only, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, hide_patterns, hide_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, escape_nonprint, time_word, time_style, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, sort_word, unsorted, reverse, dirs_first, recursive, indicator_style, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, hide_patterns, hide_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, escape_nonprint, time_word, time_style, block_size);
         }
     }
 

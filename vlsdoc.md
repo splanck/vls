@@ -37,6 +37,7 @@ vls - colorized ls replacement
 - `-F` Append indicator characters to entries: `/` for directories, `*` for executables and `@` for symbolic links.
 - `-p` Append '/' to directory names.
 - `--file-type` Like `-p` but ignores other indicators unless `-F` is also given.
+- `--indicator-style=STYLE` Choose indicator style: `none`, `slash`, `file-type`, `classify`.
 - `-s` Display the number of blocks allocated to each file. When used with `-l` or `-s`, a line of the form `total <num>` appears before the listing showing the sum of blocks for the displayed files according to the current block size.
 - `--block-size=SIZE` Override the default block size (512 or 1024 bytes).
 - `-k` Use 1 KiB blocks for size calculations.
@@ -70,6 +71,7 @@ vls --color=never
 vls -I '*.o'
 vls --hide='*.tmp'
 vls -b
+vls --indicator-style=classify
 ```
 
 ## See Also

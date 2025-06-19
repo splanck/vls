@@ -24,9 +24,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->dirs_first = 0;
     args->recursive = 0;
     args->list_dirs_only = 0;
-    args->classify = 0;
-    args->slash_dirs = 0;
-    args->file_type_only = 0;
+    args->indicator_style = INDICATOR_NONE;
     args->follow_links = 0;
     args->deref_cmdline = 0;
     args->human_readable = 0;
@@ -63,6 +61,7 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"full-time", no_argument, 0, 6},
         {"time", required_argument, 0, 10},
         {"file-type", no_argument, 0, 7},
+        {"indicator-style", required_argument, 0, 11},
         {"hide", required_argument, 0, 8},
         {"sort", required_argument, 0, 9},
         {"quote-name", no_argument, 0, 'Q'},
@@ -118,7 +117,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             args->list_dirs_only = 1;
             break;
         case 'p':
-            args->slash_dirs = 1;
+            args->indicator_style = INDICATOR_SLASH;
             break;
         case 'I':
             args->ignore_patterns = realloc(args->ignore_patterns,
@@ -133,7 +132,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             args->ignore_backups = 1;
             break;
         case 'F':
-            args->classify = 1;
+            args->indicator_style = INDICATOR_CLASSIFY;
             break;
         case 'C':
             args->columns = 1;
@@ -207,7 +206,21 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 7:
-            args->file_type_only = 1;
+            args->indicator_style = INDICATOR_FILE_TYPE;
+            break;
+        case 11:
+            if (strcmp(optarg, "none") == 0)
+                args->indicator_style = INDICATOR_NONE;
+            else if (strcmp(optarg, "slash") == 0)
+                args->indicator_style = INDICATOR_SLASH;
+            else if (strcmp(optarg, "file-type") == 0)
+                args->indicator_style = INDICATOR_FILE_TYPE;
+            else if (strcmp(optarg, "classify") == 0)
+                args->indicator_style = INDICATOR_CLASSIFY;
+            else {
+                fprintf(stderr, "Invalid indicator style: %s\n", optarg);
+                exit(1);
+            }
             break;
         case 8:
             args->hide_patterns = realloc(args->hide_patterns,
@@ -255,7 +268,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
@@ -264,7 +277,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
