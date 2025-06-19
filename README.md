@@ -23,6 +23,8 @@ A minimal, colorized replacement for `ls`.
 - Display control characters literally with `--show-control-chars`
 - Human readable sizes (`-h` uses powers of 1024, `--si` uses powers of
   1000), column layout (`-C`/`-x`) and comma-separated output (`-m`)
+- Override the block size used for `-s` with `--block-size=SIZE` where `SIZE`
+  is a number of bytes with no unit suffix; use `-k` for 1 KiB blocks
 - Set output width with `-w COLS` and tab size with `-T COLS`
 - Customizable timestamp format via `--time-style=FMT` and `--full-time`
 - Select which timestamp to show with `--time=WORD` (`mod`, `access`,
