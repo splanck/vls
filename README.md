@@ -13,6 +13,7 @@ Use `-c` to sort entries by status change time. With `-l`, change time is shown.
 Use `-S` to sort entries by file size.
 Use `-X` to sort entries by file extension.
 Use `-f` (or `-U`) to disable sorting and list entries in directory order.
+Use `--group-directories-first` to list directories before other files.
 Use `-i` to display inode numbers.
 Use `-A` or `--almost-all` to show hidden entries except `.` and `..`.
 Use `-R` to recursively list subdirectories (symbolic links are not followed).
