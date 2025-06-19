@@ -18,6 +18,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->sort_extension = 0;
     args->unsorted = 0;
     args->reverse = 0;
+    args->dirs_first = 0;
     args->recursive = 0;
     args->list_dirs_only = 0;
     args->classify = 0;
@@ -40,6 +41,7 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"almost-all", no_argument, 0, 'A'},
         {"ignore-backups", no_argument, 0, 'B'},
         {"block-size", required_argument, 0, 3},
+        {"group-directories-first", no_argument, 0, 4},
         {"help", no_argument, 0, 1},
         {0, 0, 0, 0}
     };
@@ -127,6 +129,9 @@ void parse_args(int argc, char *argv[], Args *args) {
                 exit(1);
             }
             break;
+        case 4:
+            args->dirs_first = 1;
+            break;
         case 2:
             if (strcmp(optarg, "always") == 0)
                 args->color_mode = COLOR_ALWAYS;
@@ -140,12 +145,12 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }

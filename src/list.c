@@ -102,7 +102,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line, int show_blocks, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line, int show_blocks, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -275,6 +275,30 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         else if (sort_extension)
             cmp = cmp_extension;
         qsort(entries, count, sizeof(Entry), cmp);
+    }
+
+    if (dirs_first && count > 1) {
+        Entry *tmp = malloc(count * sizeof(Entry));
+        if (!tmp) {
+            perror("malloc");
+            goto cleanup;
+        }
+        size_t di = 0;
+        size_t fi = 0;
+        for (size_t i = 0; i < count; i++)
+            if (S_ISDIR(entries[i].st.st_mode))
+                fi++;
+        di = 0;
+        size_t dir_total = fi;
+        fi = dir_total;
+        for (size_t i = 0; i < count; i++) {
+            if (S_ISDIR(entries[i].st.st_mode))
+                tmp[di++] = entries[i];
+            else
+                tmp[fi++] = entries[i];
+        }
+        memcpy(entries, tmp, count * sizeof(Entry));
+        free(tmp);
     }
 
     size_t link_w = 0, owner_w = 0, group_w = 0, size_w = 0, block_w = 0;
@@ -500,7 +524,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line, show_blocks, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line, show_blocks, block_size);
         }
     }
 

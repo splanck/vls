@@ -24,6 +24,7 @@ typedef struct {
     int sort_extension;
     int unsorted;
     int reverse;
+    int dirs_first;
     int recursive;
     int list_dirs_only;
     int follow_links;
