@@ -90,6 +90,7 @@ void parse_args(int argc, char *argv[], Args *args) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
+            args->show_hidden = 1;
             break;
         case 'a':
             args->show_hidden = 1;

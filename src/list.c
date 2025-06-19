@@ -419,7 +419,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
     }
 
     while ((entry = readdir(dir)) != NULL) {
-        if (!show_hidden && entry->d_name[0] == '.')
+        if (!show_hidden && !almost_all && entry->d_name[0] == '.')
             continue;
         if (almost_all && (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0))
             continue;
