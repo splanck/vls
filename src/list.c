@@ -391,13 +391,19 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                        S_ISSOCK(st.st_mode) ? 's' : '-';
             perms[1] = (st.st_mode & S_IRUSR) ? 'r' : '-';
             perms[2] = (st.st_mode & S_IWUSR) ? 'w' : '-';
-            perms[3] = (st.st_mode & S_IXUSR) ? 'x' : '-';
+            perms[3] = (st.st_mode & S_IXUSR)
+                        ? ((st.st_mode & S_ISUID) ? 's' : 'x')
+                        : ((st.st_mode & S_ISUID) ? 'S' : '-');
             perms[4] = (st.st_mode & S_IRGRP) ? 'r' : '-';
             perms[5] = (st.st_mode & S_IWGRP) ? 'w' : '-';
-            perms[6] = (st.st_mode & S_IXGRP) ? 'x' : '-';
+            perms[6] = (st.st_mode & S_IXGRP)
+                        ? ((st.st_mode & S_ISGID) ? 's' : 'x')
+                        : ((st.st_mode & S_ISGID) ? 'S' : '-');
             perms[7] = (st.st_mode & S_IROTH) ? 'r' : '-';
             perms[8] = (st.st_mode & S_IWOTH) ? 'w' : '-';
-            perms[9] = (st.st_mode & S_IXOTH) ? 'x' : '-';
+            perms[9] = (st.st_mode & S_IXOTH)
+                        ? ((st.st_mode & S_ISVTX) ? 't' : 'x')
+                        : ((st.st_mode & S_ISVTX) ? 'T' : '-');
             perms[10] = '\0';
 
             char time_buf[32];
@@ -1010,13 +1016,19 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                        S_ISSOCK(ent->st.st_mode) ? 's' : '-';
             perms[1] = (ent->st.st_mode & S_IRUSR) ? 'r' : '-';
             perms[2] = (ent->st.st_mode & S_IWUSR) ? 'w' : '-';
-            perms[3] = (ent->st.st_mode & S_IXUSR) ? 'x' : '-';
+            perms[3] = (ent->st.st_mode & S_IXUSR)
+                        ? ((ent->st.st_mode & S_ISUID) ? 's' : 'x')
+                        : ((ent->st.st_mode & S_ISUID) ? 'S' : '-');
             perms[4] = (ent->st.st_mode & S_IRGRP) ? 'r' : '-';
             perms[5] = (ent->st.st_mode & S_IWGRP) ? 'w' : '-';
-            perms[6] = (ent->st.st_mode & S_IXGRP) ? 'x' : '-';
+            perms[6] = (ent->st.st_mode & S_IXGRP)
+                        ? ((ent->st.st_mode & S_ISGID) ? 's' : 'x')
+                        : ((ent->st.st_mode & S_ISGID) ? 'S' : '-');
             perms[7] = (ent->st.st_mode & S_IROTH) ? 'r' : '-';
             perms[8] = (ent->st.st_mode & S_IWOTH) ? 'w' : '-';
-            perms[9] = (ent->st.st_mode & S_IXOTH) ? 'x' : '-';
+            perms[9] = (ent->st.st_mode & S_IXOTH)
+                        ? ((ent->st.st_mode & S_ISVTX) ? 't' : 'x')
+                        : ((ent->st.st_mode & S_ISVTX) ? 'T' : '-');
             perms[10] = '\0';
 
             char time_buf[32];
