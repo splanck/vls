@@ -251,11 +251,33 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
         hide_control = 0;
         escape_nonprint = 0;
     }
+
+    long pw_bufsz_l = sysconf(_SC_GETPW_R_SIZE_MAX);
+    if (pw_bufsz_l < 0)
+        pw_bufsz_l = 16384;
+    size_t pw_bufsz = (size_t)pw_bufsz_l;
+    char *pwbuf = malloc(pw_bufsz);
+    if (!pwbuf) {
+        perror("malloc");
+        return;
+    }
+    long gr_bufsz_l = sysconf(_SC_GETGR_R_SIZE_MAX);
+    if (gr_bufsz_l < 0)
+        gr_bufsz_l = 16384;
+    size_t gr_bufsz = (size_t)gr_bufsz_l;
+    char *grbuf = malloc(gr_bufsz);
+    if (!grbuf) {
+        perror("malloc");
+        free(pwbuf);
+        return;
+    }
     if (list_dirs_only) {
         struct stat st;
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
         if (stat_fn(path, &st) == -1) {
             perror("stat");
+            free(pwbuf);
+            free(grbuf);
             return;
         }
 
@@ -305,19 +327,28 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             else
                 snprintf(size_buf, sizeof(size_buf), "%lld", (long long)st.st_size);
 
-            struct passwd *pw = numeric_ids ? NULL : getpwuid(st.st_uid);
-            char owner_buf[32];
-            if (pw)
-                snprintf(owner_buf, sizeof(owner_buf), "%s", pw->pw_name);
-            else
-                snprintf(owner_buf, sizeof(owner_buf), "%u", st.st_uid);
+            struct passwd pw;
+            struct passwd *pw_res = NULL;
+            const char *owner_buf = NULL;
+            char owner_num[32];
+            if (!numeric_ids && getpwuid_r(st.st_uid, &pw, pwbuf, pw_bufsz, &pw_res) == 0 && pw_res)
+                owner_buf = pw_res->pw_name;
+            else {
+                snprintf(owner_num, sizeof(owner_num), "%u", st.st_uid);
+                owner_buf = owner_num;
+            }
 
-            struct group *gr = numeric_ids ? NULL : getgrgid(st.st_gid);
-            char group_buf[32];
-            if (gr)
-                snprintf(group_buf, sizeof(group_buf), "%s", gr->gr_name);
-            else
-                snprintf(group_buf, sizeof(group_buf), "%u", st.st_gid);
+            struct group gr;
+            struct group *gr_res = NULL;
+            const char *group_buf = NULL;
+            char group_num[32];
+            if (!numeric_ids && getgrgid_r(st.st_gid, &gr, grbuf, gr_bufsz, &gr_res) == 0 && gr_res)
+                group_buf = gr_res->gr_name;
+            else {
+                snprintf(group_num, sizeof(group_num), "%u", st.st_gid);
+                group_buf = group_num;
+            }
+
 
             char perms[11];
             perms[0] = S_ISDIR(st.st_mode) ? 'd' :
@@ -353,15 +384,18 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             struct tm *tm = localtime(tptr);
             strftime(time_buf, sizeof(time_buf), time_style, tm);
 
+            size_t owner_len = strlen(owner_buf);
+            size_t group_len = strlen(group_buf);
+
             if (show_blocks)
                 printf("%*lu ", (int)single_w, single_blocks);
             if (show_inode)
                 printf("%10llu ", (unsigned long long)st.st_ino);
             printf("%s %*lu ", perms, (int)link_w, (unsigned long)st.st_nlink);
             if (!hide_owner)
-                printf("%-*s ", (int)strlen(owner_buf), owner_buf);
+                printf("%-*s ", (int)owner_len, owner_buf);
             if (!hide_group)
-                printf("%-*s ", (int)strlen(group_buf), group_buf);
+                printf("%-*s ", (int)group_len, group_buf);
             printf("%*s %s", (int)strlen(size_buf), size_buf, time_buf);
             if (show_context) {
 #if HAVE_SELINUX
@@ -405,6 +439,8 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
     DIR *dir = opendir(path);
     if (!dir) {
         perror("opendir");
+        free(pwbuf);
+        free(grbuf);
         return;
     }
 
@@ -421,6 +457,8 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
     if (!entries) {
         perror("malloc");
         closedir(dir);
+        free(pwbuf);
+        free(grbuf);
         return;
     }
 
@@ -555,15 +593,25 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                 link_w = num_digits(ent->st.st_nlink);
 
             if (!hide_owner) {
-                struct passwd *pw = numeric_ids ? NULL : getpwuid(ent->st.st_uid);
-                size_t len = pw ? strlen(pw->pw_name) : num_digits(ent->st.st_uid);
+                struct passwd pw;
+                struct passwd *pw_res = NULL;
+                size_t len;
+                if (!numeric_ids && getpwuid_r(ent->st.st_uid, &pw, pwbuf, pw_bufsz, &pw_res) == 0 && pw_res)
+                    len = strlen(pw_res->pw_name);
+                else
+                    len = num_digits(ent->st.st_uid);
                 if (len > owner_w)
                     owner_w = len;
             }
 
             if (!hide_group) {
-                struct group *gr = numeric_ids ? NULL : getgrgid(ent->st.st_gid);
-                size_t len = gr ? strlen(gr->gr_name) : num_digits(ent->st.st_gid);
+                struct group gr;
+                struct group *gr_res = NULL;
+                size_t len;
+                if (!numeric_ids && getgrgid_r(ent->st.st_gid, &gr, grbuf, gr_bufsz, &gr_res) == 0 && gr_res)
+                    len = strlen(gr_res->gr_name);
+                else
+                    len = num_digits(ent->st.st_gid);
                 if (len > group_w)
                     group_w = len;
             }
@@ -892,19 +940,27 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             else
                 snprintf(size_buf, sizeof(size_buf), "%lld", (long long)ent->st.st_size);
 
-            struct passwd *pw = numeric_ids ? NULL : getpwuid(ent->st.st_uid);
-            char owner_buf[32];
-            if (pw)
-                snprintf(owner_buf, sizeof(owner_buf), "%s", pw->pw_name);
-            else
-                snprintf(owner_buf, sizeof(owner_buf), "%u", ent->st.st_uid);
+            struct passwd pw;
+            struct passwd *pw_res = NULL;
+            const char *owner_buf = NULL;
+            char owner_num[32];
+            if (!numeric_ids && getpwuid_r(ent->st.st_uid, &pw, pwbuf, pw_bufsz, &pw_res) == 0 && pw_res)
+                owner_buf = pw_res->pw_name;
+            else {
+                snprintf(owner_num, sizeof(owner_num), "%u", ent->st.st_uid);
+                owner_buf = owner_num;
+            }
 
-            struct group *gr = numeric_ids ? NULL : getgrgid(ent->st.st_gid);
-            char group_buf[32];
-            if (gr)
-                snprintf(group_buf, sizeof(group_buf), "%s", gr->gr_name);
-            else
-                snprintf(group_buf, sizeof(group_buf), "%u", ent->st.st_gid);
+            struct group gr;
+            struct group *gr_res = NULL;
+            const char *group_buf = NULL;
+            char group_num[32];
+            if (!numeric_ids && getgrgid_r(ent->st.st_gid, &gr, grbuf, gr_bufsz, &gr_res) == 0 && gr_res)
+                group_buf = gr_res->gr_name;
+            else {
+                snprintf(group_num, sizeof(group_num), "%u", ent->st.st_gid);
+                group_buf = group_num;
+            }
 
             char perms[11];
             perms[0] = S_ISDIR(ent->st.st_mode) ? 'd' :
@@ -1037,4 +1093,6 @@ cleanup:
         free(entries[i].name);
     free(entries);
     closedir(dir);
+    free(pwbuf);
+    free(grbuf);
 }
