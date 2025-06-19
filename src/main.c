@@ -4,6 +4,21 @@
 #include "color.h"
 #include <sys/stat.h>
 #include <ctype.h>
+#include <unistd.h>
+
+static int hyperlink_enabled(HyperlinkMode mode) {
+    return mode == HYPERLINK_ALWAYS || (mode == HYPERLINK_AUTO && isatty(STDOUT_FILENO));
+}
+
+static void hyperlink_start(const char *target, HyperlinkMode mode) {
+    if (hyperlink_enabled(mode))
+        printf("\033]8;;%s\033\\", target);
+}
+
+static void hyperlink_end(HyperlinkMode mode) {
+    if (hyperlink_enabled(mode))
+        printf("\033]8;;\033\\");
+}
 
 static void print_quoted(const char *s, QuotingStyle style, int hide_control, int show_controls, int literal_names) {
     if (literal_names) {
@@ -51,7 +66,9 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < args.path_count; i++) {
         const char *path = args.paths[i];
         if (!args.recursive && args.path_count > 1 && !args.list_dirs_only) {
+            hyperlink_start(path, args.hyperlink_mode);
             print_quoted(path, args.quoting_style, args.hide_control, args.show_controls, args.literal_names);
+            hyperlink_end(args.hyperlink_mode);
             printf(":\n");
         }
 
@@ -62,7 +79,7 @@ int main(int argc, char *argv[]) {
                 continue;
             }
             if (args.list_dirs_only || !S_ISDIR(st.st_mode)) {
-                list_directory(path, args.color_mode, args.show_hidden, args.almost_all,
+                list_directory(path, args.color_mode, args.hyperlink_mode, args.show_hidden, args.almost_all,
                               args.long_format, args.show_inode, args.sort_time,
                               args.sort_atime, args.sort_ctime, args.sort_size, args.sort_extension,
                               args.sort_version, args.sort_word, args.unsorted, args.reverse, args.dirs_first, args.recursive,
@@ -79,7 +96,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        list_directory(path, args.color_mode, args.show_hidden, args.almost_all,
+        list_directory(path, args.color_mode, args.hyperlink_mode, args.show_hidden, args.almost_all,
                       args.long_format, args.show_inode, args.sort_time,
                       args.sort_atime, args.sort_ctime, args.sort_size, args.sort_extension,
                       args.sort_version, args.sort_word, args.unsorted, args.reverse, args.dirs_first, args.recursive,
