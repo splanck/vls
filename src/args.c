@@ -4,6 +4,7 @@
 #include "args.h"
 #include <string.h>
 #include <unistd.h>
+#include "version.h"
 
 void parse_args(int argc, char *argv[], Args *args) {
     args->color_mode = COLOR_AUTO;
@@ -48,11 +49,12 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"group-directories-first", no_argument, 0, 4},
         {"quote-name", no_argument, 0, 'Q'},
         {"help", no_argument, 0, 1},
+        {"version", no_argument, 0, 'V'},
         {0, 0, 0, 0}
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpI:BhLdgonC1sQ", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpI:BhLdgonC1sQV", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -162,12 +164,16 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [-Q] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
+        case 'V':
+            printf("vls %s\n", VLS_VERSION);
+            exit(0);
+            break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [-Q] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
