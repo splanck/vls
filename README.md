@@ -14,7 +14,7 @@ A minimal, colorized replacement for `ls`.
   `--file-type` for directory markers only
 - Hide entries matching glob patterns with `--hide=PATTERN`
 - Optional dereferencing of command line symlinks (`-H`)
-- Optional display of SELinux contexts (`-Z`, Linux only)
+- Optional display of SELinux contexts (`-Z`, Linux only, requires libselinux)
 - Quoting styles with `--quoting-style=STYLE` (`literal`, `c`, `escape`),
   with `-Q` and `-b` as shortcuts
 - Print names literally with `-N`/`--literal`, overriding quoting and
@@ -34,6 +34,7 @@ at [man/vls.1](./man/vls.1).
 
 ## Building
 Run `make` to compile. Override `CFLAGS` or `PREFIX` as needed.
+SELinux support requires the libselinux development package to be installed.
 
 ## Installation
 Install with `sudo make install`. Use `PREFIX` to choose a different

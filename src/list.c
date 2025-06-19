@@ -13,15 +13,21 @@
 #include <time.h>
 #include <fnmatch.h>
 #include <stdbool.h>
-#ifdef __has_include
-# if __has_include(<selinux/selinux.h>)
-#  include <selinux/selinux.h>
-#  define HAVE_SELINUX 1
-# else
-#  define HAVE_SELINUX 0
-# endif
-#else
+#ifndef HAVE_SELINUX
 # define HAVE_SELINUX 0
+#endif
+
+#if HAVE_SELINUX
+# ifdef __has_include
+#  if __has_include(<selinux/selinux.h>)
+#   include <selinux/selinux.h>
+#  else
+#   undef HAVE_SELINUX
+#   define HAVE_SELINUX 0
+#  endif
+# else
+#  include <selinux/selinux.h>
+# endif
 #endif
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
