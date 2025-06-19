@@ -13,6 +13,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->show_inode = 0;
     args->sort_time = 0;
     args->sort_atime = 0;
+    args->sort_ctime = 0;
     args->sort_size = 0;
     args->sort_extension = 0;
     args->unsorted = 0;
@@ -41,7 +42,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtruUfhXRFpBhLdgonC1", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpBhLdgonC1", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -60,6 +61,9 @@ void parse_args(int argc, char *argv[], Args *args) {
             break;
         case 'u':
             args->sort_atime = 1;
+            break;
+        case 'c':
+            args->sort_ctime = 1;
             break;
         case 'S':
             args->sort_size = 1;
@@ -123,12 +127,12 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }

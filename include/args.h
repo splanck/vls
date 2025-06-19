@@ -19,6 +19,7 @@ typedef struct {
     int show_inode;
     int sort_time;
     int sort_atime;
+    int sort_ctime;
     int sort_size;
     int sort_extension;
     int unsorted;

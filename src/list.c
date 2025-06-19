@@ -50,6 +50,14 @@ static int cmp_atime(const void *a, const void *b) {
     return (ea->st.st_atime > eb->st.st_atime) ? -1 : 1;
 }
 
+static int cmp_ctime(const void *a, const void *b) {
+    const Entry *ea = a;
+    const Entry *eb = b;
+    if (ea->st.st_ctime == eb->st.st_ctime)
+        return 0;
+    return (ea->st.st_ctime > eb->st.st_ctime) ? -1 : 1;
+}
+
 static int cmp_size(const void *a, const void *b) {
     const Entry *ea = a;
     const Entry *eb = b;
@@ -94,7 +102,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int sort_extension, int unsorted, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -171,7 +179,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             perms[10] = '\0';
 
             char time_buf[32];
-            struct tm *tm = localtime(sort_atime ? &st.st_atime : &st.st_mtime);
+            struct tm *tm = localtime(sort_atime ? &st.st_atime :
+                                       sort_ctime ? &st.st_ctime : &st.st_mtime);
             strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
 
             if (show_inode)
@@ -254,6 +263,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             cmp = cmp_mtime;
         else if (sort_atime)
             cmp = cmp_atime;
+        else if (sort_ctime)
+            cmp = cmp_ctime;
         else if (sort_extension)
             cmp = cmp_extension;
         qsort(entries, count, sizeof(Entry), cmp);
@@ -425,7 +436,9 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             perms[10] = '\0';
 
             char time_buf[32];
-            struct tm *tm = localtime(sort_atime ? &ent->st.st_atime : &ent->st.st_mtime);
+            struct tm *tm = localtime(sort_atime ? &ent->st.st_atime :
+                                       sort_ctime ? &ent->st.st_ctime :
+                                       &ent->st.st_mtime);
             strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
 
             if (show_inode)
@@ -459,7 +472,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, sort_extension, unsorted, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line);
         }
     }
 
