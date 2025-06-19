@@ -55,21 +55,24 @@ test: build/vls
 	mkdir -p build/testdir
 	touch build/testdir/foo build/testdir/.bar
 	@set -e; \
-	./build/vls -A build/testdir > build/out_A.txt; \
-	test $$? -eq 0; \
+	./build/vls -A build/testdir > build/out_A.txt; rc=$$?; \
+	echo $$rc > build/rc_A.txt; test $$rc -eq 0; \
 	grep -q '.bar' build/out_A.txt; \
-	./build/vls -d build/testdir > build/out_d.txt; \
-	test $$? -eq 0; \
+	./build/vls -d build/testdir > build/out_d.txt; rc=$$?; \
+	echo $$rc > build/rc_d.txt; test $$rc -eq 0; \
 	grep -q 'testdir' build/out_d.txt; \
-	./build/vls -C build/testdir > build/out_C.txt; \
-	test $$? -eq 0; \
+	./build/vls -C build/testdir > build/out_C.txt; rc=$$?; \
+	echo $$rc > build/rc_C.txt; test $$rc -eq 0; \
 	test -s build/out_C.txt; \
-	./build/vls -m build/testdir > build/out_m.txt; \
-	test $$? -eq 0; \
+	./build/vls -m build/testdir > build/out_m.txt; rc=$$?; \
+	echo $$rc > build/rc_m.txt; test $$rc -eq 0; \
 	test -s build/out_m.txt; \
-	./build/vls --color=always build/testdir > build/out_color.txt; \
-	test $$? -eq 0; \
-	grep -P -q '\x1b\[' build/out_color.txt; \
+	./build/vls --color=always build/testdir > build/out_color_on.txt; rc=$$?; \
+	echo $$rc > build/rc_color_on.txt; test $$rc -eq 0; \
+	grep -P -q '\x1b\[' build/out_color_on.txt; \
+	./build/vls --color=never build/testdir > build/out_color_off.txt; rc=$$?; \
+	echo $$rc > build/rc_color_off.txt; test $$rc -eq 0; \
+	! grep -P -q '\x1b\[' build/out_color_off.txt; \
 	rm -r build/testdir; \
 	echo "Tests completed"
 
