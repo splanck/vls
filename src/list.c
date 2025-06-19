@@ -13,6 +13,12 @@
 #include <time.h>
 #include <fnmatch.h>
 #include <stdbool.h>
+#if __has_include(<selinux/selinux.h>)
+# include <selinux/selinux.h>
+# define HAVE_SELINUX 1
+#else
+# define HAVE_SELINUX 0
+#endif
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
 # ifndef PATH_MAX
@@ -128,7 +134,7 @@ static void print_quoted(const char *s, int quote) {
     putchar('"');
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -221,7 +227,21 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                 printf("%-*s ", (int)strlen(owner_buf), owner_buf);
             if (!hide_group)
                 printf("%-*s ", (int)strlen(group_buf), group_buf);
-            printf("%*s %s %s", (int)strlen(size_buf), size_buf, time_buf, prefix);
+            printf("%*s %s", (int)strlen(size_buf), size_buf, time_buf);
+            if (show_context) {
+#if HAVE_SELINUX
+                char *ctx = NULL;
+                if (lgetfilecon(path, &ctx) >= 0) {
+                    printf(" %s", ctx);
+                    freecon(ctx);
+                } else {
+                    printf(" -");
+                }
+#else
+                printf(" -");
+#endif
+            }
+            printf(" %s", prefix);
             print_quoted(path, quote_names);
             printf("%s%s\n", suffix, indicator);
         } else {
@@ -664,7 +684,23 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                 printf("%-*s ", (int)owner_w, owner_buf);
             if (!hide_group)
                 printf("%-*s ", (int)group_w, group_buf);
-            printf("%*s %s %s", (int)size_w, size_buf, time_buf, prefix);
+            printf("%*s %s", (int)size_w, size_buf, time_buf);
+            if (show_context) {
+#if HAVE_SELINUX
+                char *ctx = NULL;
+                char fullpath[PATH_MAX];
+                snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
+                if (lgetfilecon(fullpath, &ctx) >= 0) {
+                    printf(" %s", ctx);
+                    freecon(ctx);
+                } else {
+                    printf(" -");
+                }
+#else
+                printf(" -");
+#endif
+            }
+            printf(" %s", prefix);
             print_quoted(ent->name, quote_names);
             printf("%s%s\n", suffix, indicator);
         } else {
@@ -695,7 +731,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, block_size);
         }
     }
 

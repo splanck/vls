@@ -33,6 +33,7 @@ typedef struct {
     int numeric_ids;
     int hide_owner;
     int hide_group;
+    int show_context;
     int classify;
     int slash_dirs;
     int ignore_backups;

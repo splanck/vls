@@ -16,6 +16,9 @@ Default behavior is to display information about symbolic links. Use
 to follow them or
 .BR -H
 for command line paths only.
+The
+.BR -Z
+option prints SELinux contexts when available and is only meaningful on Linux.
 .SH OPTIONS
 .TP
 .BR -a
@@ -69,6 +72,9 @@ Follow symbolic links when retrieving file details.
 .TP
 .BR -H
 Follow symbolic links specified on the command line.
+.TP
+.BR -Z
+Print SELinux context before the file name (Linux only).
 .TP
 .BR -F
 Append indicator characters to entries: '/' for directories, '*' for executables and '@' for symbolic links.

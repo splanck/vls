@@ -30,6 +30,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->numeric_ids = 0;
     args->hide_owner = 0;
     args->hide_group = 0;
+    args->show_context = 0;
     args->ignore_backups = 0;
     args->ignore_patterns = NULL;
     args->ignore_count = 0;
@@ -57,7 +58,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpI:BhHLdgonCx1msQVk", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpI:BhHLZdgonCx1msQVk", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -137,6 +138,9 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'H':
             args->deref_cmdline = 1;
             break;
+        case 'Z':
+            args->show_context = 1;
+            break;
         case 's':
             args->show_blocks = 1;
             break;
@@ -181,8 +185,8 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
-            printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only.\n");
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
         case 'V':
@@ -190,7 +194,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
