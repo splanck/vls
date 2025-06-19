@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
                                 args.ignore_patterns, args.ignore_count,
                                 args.hide_patterns, args.hide_count,
                                 args.columns, args.across_columns, args.one_per_line, args.comma_separated,
-                                args.show_blocks, args.quoting_style, args.time_word, args.time_style, args.block_size, args.hide_control, args.show_controls, args.literal_names);
+                                args.output_width, args.tabsize, args.show_blocks, args.quoting_style, args.time_word, args.time_style, args.block_size, args.hide_control, args.show_controls, args.literal_names);
                 if (i < args.path_count - 1)
                     printf("\n");
                 continue;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
                         args.ignore_patterns, args.ignore_count,
                         args.hide_patterns, args.hide_count,
                         args.columns, args.across_columns, args.one_per_line, args.comma_separated,
-                        args.show_blocks, args.quoting_style, args.time_word, args.time_style, args.block_size, args.hide_control, args.show_controls, args.literal_names);
+                        args.output_width, args.tabsize, args.show_blocks, args.quoting_style, args.time_word, args.time_style, args.block_size, args.hide_control, args.show_controls, args.literal_names);
         if (i < args.path_count - 1)
             printf("\n");
     }
