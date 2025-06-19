@@ -11,6 +11,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
+#include <fnmatch.h>
 #if defined(__APPLE__) || defined(__NetBSD__) || defined(__FreeBSD__)
 # include <sys/param.h>
 # ifndef PATH_MAX
@@ -102,7 +103,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line, int show_blocks, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int one_per_line, int show_blocks, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -235,6 +236,14 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         if (ignore_backups) {
             size_t len = strlen(entry->d_name);
             if (len > 0 && entry->d_name[len - 1] == '~')
+                continue;
+        }
+        if (ignore_patterns) {
+            int matched = 0;
+            for (size_t i = 0; i < ignore_count && !matched; i++)
+                if (fnmatch(ignore_patterns[i], entry->d_name, 0) == 0)
+                    matched = 1;
+            if (matched)
                 continue;
         }
         if (count == capacity) {
@@ -524,7 +533,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line, show_blocks, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, one_per_line, show_blocks, block_size);
         }
     }
 
