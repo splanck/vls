@@ -35,6 +35,7 @@
 #include "list.h"
 #include "color.h"
 #include "util.h"
+#include "quote.h"
 
 static int hyperlink_enabled(HyperlinkMode mode) {
     return mode == HYPERLINK_ALWAYS || (mode == HYPERLINK_AUTO && isatty(STDOUT_FILENO));
@@ -195,44 +196,6 @@ static size_t escaped_len(const char *s, int hide_control) {
     return len;
 }
 
-static void print_quoted(const char *s, QuotingStyle style, int hide_control, int show_controls, int literal_names) {
-    if (literal_names) {
-        fputs(s, stdout);
-        return;
-    }
-    int quote = (style == QUOTE_C);
-    int escape_nonprint = (style == QUOTE_C || style == QUOTE_ESCAPE);
-    if (show_controls) {
-        hide_control = 0;
-        escape_nonprint = 0;
-    }
-    if (!quote && !escape_nonprint && !hide_control) {
-        fputs(s, stdout);
-        return;
-    }
-    if (quote)
-        putchar('"');
-    for (const char *p = s; *p; p++) {
-        unsigned char c = (unsigned char)*p;
-        if (quote && (c == '"' || c == '\\'))
-            putchar('\\');
-        if (!isprint(c)) {
-            if (hide_control) {
-                putchar('?');
-            } else if (escape_nonprint) {
-                char buf[5];
-                snprintf(buf, sizeof(buf), "\\%03o", c);
-                fputs(buf, stdout);
-            } else {
-                putchar(c);
-            }
-        } else {
-            putchar(c);
-        }
-    }
-    if (quote)
-        putchar('"');
-}
 
 void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperlink_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, const char *sort_word, int unsorted, int reverse, int dirs_first, int recursive, IndicatorStyle indicator_style, int human_readable, int human_si, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, const char **hide_patterns, size_t hide_count, int columns, int across_columns, int one_per_line, int comma_separated, int output_width, int tabsize, int show_blocks, QuotingStyle quoting_style, const char *time_word, const char *time_style, unsigned block_size, int hide_control, int show_controls, int literal_names) {
     int use_color = 0;
