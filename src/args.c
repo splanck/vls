@@ -4,6 +4,7 @@
 #include "args.h"
 #include <string.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include "version.h"
 
 void parse_args(int argc, char *argv[], Args *args) {
@@ -51,6 +52,8 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->time_word = NULL;
     args->time_style = "%b %e %H:%M";
     args->block_size = 0;
+    args->output_width = 0;
+    args->tabsize = 8;
     args->paths = NULL;
     args->path_count = 0;
 
@@ -68,6 +71,8 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"indicator-style", required_argument, 0, 11},
         {"hide", required_argument, 0, 8},
         {"sort", required_argument, 0, 9},
+        {"width", required_argument, 0, 'w'},
+        {"tabsize", required_argument, 0, 'T'},
         {"quote-name", no_argument, 0, 'Q'},
         {"quoting-style", required_argument, 0, 12},
         {"literal", no_argument, 0, 'N'},
@@ -81,7 +86,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtrucUfhXvRFpI:BhHLZdgonCx1msbQVNkq", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtrucUfhXvRFpI:BhHLZdgonCx1msbQVNkqw:T:", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -197,6 +202,20 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 13:
             args->show_controls = 1;
             args->hide_control = 0;
+            break;
+        case 'w':
+            args->output_width = (int)strtol(optarg, NULL, 10);
+            if (args->output_width <= 0) {
+                fprintf(stderr, "Invalid width: %s\n", optarg);
+                exit(1);
+            }
+            break;
+        case 'T':
+            args->tabsize = (int)strtol(optarg, NULL, 10);
+            if (args->tabsize <= 0) {
+                fprintf(stderr, "Invalid tab size: %s\n", optarg);
+                exit(1);
+            }
             break;
         case 'k':
             args->block_size = 1024;
@@ -315,7 +334,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [--si] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-N] [-q] [-V] [--color=WHEN] [--hyperlink=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--literal] [--hide-control-chars] [--show-control-chars] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [--si] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-N] [-q] [-w COLS] [-T COLS] [-V] [--color=WHEN] [--hyperlink=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--literal] [--hide-control-chars] [--show-control-chars] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
@@ -324,7 +343,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [--si] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-N] [-q] [-V] [--color=WHEN] [--hyperlink=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--literal] [--hide-control-chars] [--show-control-chars] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [--si] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-N] [-q] [-w COLS] [-T COLS] [-V] [--color=WHEN] [--hyperlink=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--literal] [--hide-control-chars] [--show-control-chars] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
@@ -337,6 +356,13 @@ void parse_args(int argc, char *argv[], Args *args) {
 
     if (args->block_size == 0) {
         args->block_size = getenv("POSIXLY_CORRECT") ? 512 : 1024;
+    }
+
+    if (args->output_width <= 0) {
+        struct winsize ws;
+        args->output_width = 80;
+        if (isatty(STDOUT_FILENO) && ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0 && ws.ws_col > 0)
+            args->output_width = ws.ws_col;
     }
 
     if (optind < argc) {

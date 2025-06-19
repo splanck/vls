@@ -72,6 +72,8 @@ typedef struct {
     const char *time_word;
     const char *time_style;
     unsigned block_size;
+    int output_width;
+    int tabsize;
     int hide_control;
     int show_controls;
     int literal_names;

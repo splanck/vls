@@ -52,6 +52,8 @@ vls - colorized ls replacement
 - `-C` List entries vertically in columns (default for terminals).
 - `-x` List entries across columns instead of vertically.
 - `-m` List entries separated by ", " wrapping lines to terminal width.
+- `-w COLS`, `--width=COLS` Set the output width.
+- `-T COLS`, `--tabsize=COLS` Set tab width for column calculations.
 - `-Q`, `--quote-name` Use C-style quoting for file names.
 - `-b` Use backslash escapes for non-printable characters.
 - `--quoting-style=STYLE` Select quoting style: `literal`, `c`, `escape`.
