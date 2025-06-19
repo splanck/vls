@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
                               args.unsorted, args.reverse, args.dirs_first, args.recursive,
                               args.classify, args.slash_dirs, args.human_readable,
                               args.numeric_ids, args.hide_owner, args.hide_group,
-                              1, 1, args.ignore_backups,
+                              args.show_context, 1, 1, args.ignore_backups,
                                 args.ignore_patterns, args.ignore_count, args.columns,
                                 args.across_columns, args.one_per_line, args.comma_separated,
                                 args.show_blocks, args.quote_names, args.block_size);
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
                       args.unsorted, args.reverse, args.dirs_first, args.recursive,
                       args.classify, args.slash_dirs, args.human_readable,
                       args.numeric_ids, args.hide_owner, args.hide_group,
-                      args.follow_links, args.list_dirs_only, args.ignore_backups,
+                      args.show_context, args.follow_links, args.list_dirs_only, args.ignore_backups,
                         args.ignore_patterns, args.ignore_count, args.columns,
                         args.across_columns, args.one_per_line, args.comma_separated,
                         args.show_blocks, args.quote_names, args.block_size);

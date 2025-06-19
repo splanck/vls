@@ -8,6 +8,7 @@ A minimal, colorized replacement for `ls`.
 - Recursive listing and directory-first ordering
 - Pattern ignoring and indicator characters ("/", "*", "@")
 - Optional dereferencing of command line symlinks (`-H`)
+- Optional display of SELinux contexts (`-Z`, Linux only)
 - Options for quoting names, human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
 - Cross‑platform Makefile for Linux, macOS and NetBSD
 

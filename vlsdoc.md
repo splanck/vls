@@ -26,6 +26,7 @@ vls - colorized ls replacement
 - `-d` List directory arguments themselves instead of their contents.
 - `-L` Follow symbolic links when retrieving file details.
 - `-H` Follow symbolic links specified on the command line.
+- `-Z` Print SELinux context before the file name (Linux only).
 - `-F` Append indicator characters to entries: `/` for directories, `*` for executables and `@` for symbolic links.
 - `-p` Append '/' to directory names.
 - `-s` Display the number of blocks allocated to each file. When used with `-l` or `-s`, a line of the form `total <num>` appears before the listing showing the sum of blocks for the displayed files according to the current block size.
@@ -48,6 +49,7 @@ vls - colorized ls replacement
 
 ## Environment
 - `LS_COLORS` - When set, overrides the default color codes. Use keys `di` for directories, `ln` for symbolic links, `ex` for executables and `rs` for the reset sequence.
+- SELinux context display (`-Z`) is only available on Linux systems with the SELinux library installed.
 
 ## Examples
 ```sh
