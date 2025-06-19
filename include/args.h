@@ -46,6 +46,7 @@ typedef struct {
     int comma_separated;
     int show_blocks;
     int quote_names;
+    int escape_nonprint;
     unsigned block_size;
 } Args;
 
