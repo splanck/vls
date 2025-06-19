@@ -7,7 +7,7 @@ vls - colorized ls replacement
 `vls [OPTION]... [FILE]...`
 
 ## Description
-`vls` is a minimal utility that lists directory contents similarly to `ls`. File names are colorized by default. The option `--color=WHEN` controls coloring where WHEN is `auto`, `always` or `never`. The default is to display information about symbolic links. Use `-L` to follow them.
+`vls` is a minimal utility that lists directory contents similarly to `ls`. File names are colorized by default. The option `--color=WHEN` controls coloring where WHEN is `auto`, `always` or `never`. The default is to display information about symbolic links. Use `-L` to follow them or `-H` for command line paths only.
 
 ## Options
 - `-a` Include directory entries whose names begin with a dot (.).
@@ -25,6 +25,7 @@ vls - colorized ls replacement
 - `-R` List subdirectories recursively (symbolic links are not followed).
 - `-d` List directory arguments themselves instead of their contents.
 - `-L` Follow symbolic links when retrieving file details.
+- `-H` Follow symbolic links specified on the command line.
 - `-F` Append indicator characters to entries: `/` for directories, `*` for executables and `@` for symbolic links.
 - `-p` Append '/' to directory names.
 - `-s` Display the number of blocks allocated to each file. When used with `-l` or `-s`, a line of the form `total <num>` appears before the listing showing the sum of blocks for the displayed files according to the current block size.
