@@ -33,6 +33,8 @@ Use `-o` to omit group names in long format.
 Use `-B` or `--ignore-backups` to skip entries ending with '~'.
 Use `-I PATTERN` or `--ignore=PATTERN` to exclude matching entries. Repeat for multiple patterns.
 Use `-C` to display entries in columns and `-1` to list one per line.
+Use `-Q` or `--quote-name` to wrap file names in double quotes, escaping
+any internal quotes or backslashes.
 You may specify one or more paths to list. When multiple targets are given,
 `vls` prints a heading before each listing just like `ls`.
 

@@ -3,6 +3,20 @@
 #include "args.h"
 #include "color.h"
 
+static void print_quoted(const char *s, int quote) {
+    if (!quote) {
+        fputs(s, stdout);
+        return;
+    }
+    putchar('"');
+    for (const char *p = s; *p; p++) {
+        if (*p == '"' || *p == '\\')
+            putchar('\\');
+        putchar(*p);
+    }
+    putchar('"');
+}
+
 #define VLS_VERSION "0.1"
 
 int main(int argc, char *argv[]) {
@@ -13,16 +27,19 @@ int main(int argc, char *argv[]) {
     printf("vls %s\n", VLS_VERSION);
     for (size_t i = 0; i < args.path_count; i++) {
         const char *path = args.paths[i];
-        if (!args.recursive && args.path_count > 1 && !args.list_dirs_only)
-            printf("%s:\n", path);
+        if (!args.recursive && args.path_count > 1 && !args.list_dirs_only) {
+            print_quoted(path, args.quote_names);
+            printf(":\n");
+        }
         list_directory(path, args.color_mode, args.show_hidden, args.almost_all,
                       args.long_format, args.show_inode, args.sort_time,
                       args.sort_atime, args.sort_ctime, args.sort_size, args.sort_extension, args.unsorted, args.reverse, args.dirs_first, args.recursive,
                       args.classify, args.slash_dirs, args.human_readable,
                       args.numeric_ids, args.hide_owner, args.hide_group,
                       args.follow_links, args.list_dirs_only, args.ignore_backups,
-                      args.ignore_patterns, args.ignore_count, args.columns,
-                      args.one_per_line, args.show_blocks, args.block_size);
+                        args.ignore_patterns, args.ignore_count, args.columns,
+                        args.one_per_line, args.show_blocks, args.quote_names,
+                        args.block_size);
         if (i < args.path_count - 1)
             printf("\n");
     }
