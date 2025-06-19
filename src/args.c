@@ -33,6 +33,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->ignore_patterns = NULL;
     args->ignore_count = 0;
     args->columns = isatty(STDOUT_FILENO);
+    args->across_columns = 0;
     args->one_per_line = 0;
     args->show_blocks = 0;
     args->quote_names = 0;
@@ -54,7 +55,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpI:BhLdgonC1sQV", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpI:BhLdgonCx1sQV", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -116,6 +117,11 @@ void parse_args(int argc, char *argv[], Args *args) {
             break;
         case 'C':
             args->columns = 1;
+            args->across_columns = 0;
+            break;
+        case 'x':
+            args->columns = 1;
+            args->across_columns = 1;
             break;
         case '1':
             args->one_per_line = 1;
@@ -164,7 +170,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-x] [-1] [-h] [-n] [-g] [-o] [-s] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
@@ -173,7 +179,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-x] [-1] [-h] [-n] [-g] [-o] [-s] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
