@@ -6,6 +6,7 @@
 #include <strings.h>
 #include <limits.h>
 #include <unistd.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <pwd.h>
@@ -244,7 +245,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
         struct stat st;
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
         if (stat_fn(path, &st) == -1) {
-            perror("stat");
+            fprintf(stderr, "stat: %s: %s\n", path, strerror(errno));
             free(pwbuf);
             free(grbuf);
             return;
@@ -407,7 +408,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
 
     DIR *dir = opendir(path);
     if (!dir) {
-        perror("opendir");
+        fprintf(stderr, "opendir: %s: %s\n", path, strerror(errno));
         free(pwbuf);
         free(grbuf);
         return;
@@ -478,7 +479,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
         }
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
         if (stat_fn(fullpath, &entries[count].st) == -1) {
-            perror("stat");
+            fprintf(stderr, "stat: %s: %s\n", fullpath, strerror(errno));
             free(fullpath);
             free(entries[count].name);
             continue;

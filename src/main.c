@@ -6,6 +6,8 @@
 #include <sys/stat.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <errno.h>
+#include <string.h>
 
 static int hyperlink_enabled(HyperlinkMode mode) {
     return mode == HYPERLINK_ALWAYS || (mode == HYPERLINK_AUTO && isatty(STDOUT_FILENO));
@@ -38,7 +40,7 @@ int main(int argc, char *argv[]) {
         if (args.deref_cmdline) {
             struct stat st;
             if (stat(path, &st) == -1) {
-                perror("stat");
+                fprintf(stderr, "stat: %s: %s\n", path, strerror(errno));
                 continue;
             }
             if (args.list_dirs_only || !S_ISDIR(st.st_mode)) {
