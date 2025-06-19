@@ -7,6 +7,7 @@ A minimal, colorized replacement for `ls`.
 - Supports long listings and various sorting modes (time, size, extension)
 - Recursive listing and directory-first ordering
 - Pattern ignoring and indicator characters ("/", "*", "@")
+- Optional dereferencing of command line symlinks (`-H`)
 - Options for quoting names, human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
 - Cross‑platform Makefile for Linux, macOS and NetBSD
 

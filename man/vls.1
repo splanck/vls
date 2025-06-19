@@ -13,7 +13,9 @@ File names are colorized by default. The option
 controls coloring where WHEN is \fIauto\fP, \fIalways\fP or \fInever\fP.
 Default behavior is to display information about symbolic links. Use
 .BR -L
-to follow them.
+to follow them or
+.BR -H
+for command line paths only.
 .SH OPTIONS
 .TP
 .BR -a
@@ -64,6 +66,9 @@ List directory arguments themselves instead of their contents.
 .TP
 .BR -L
 Follow symbolic links when retrieving file details.
+.TP
+.BR -H
+Follow symbolic links specified on the command line.
 .TP
 .BR -F
 Append indicator characters to entries: '/' for directories, '*' for executables and '@' for symbolic links.

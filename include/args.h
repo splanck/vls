@@ -28,6 +28,7 @@ typedef struct {
     int recursive;
     int list_dirs_only;
     int follow_links;
+    int deref_cmdline;
     int human_readable;
     int numeric_ids;
     int hide_owner;
