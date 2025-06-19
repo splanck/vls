@@ -4,7 +4,7 @@ A minimal, colorized replacement for `ls`.
 
 ## Features
 - Colorizes output based on file type with `LS_COLORS` customization
-- Supports long listings and various sorting modes (time, size, extension, version)
+- Supports long listings and sorting with `--sort=WORD` (time, size, atime, ctime, extension, version, none)
 - Recursive listing and directory-first ordering
 - Pattern ignoring and indicator characters ("/", "*", "@"); use `--file-type` for directory markers only
 - Hide entries matching glob patterns with `--hide=PATTERN`

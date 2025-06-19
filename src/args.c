@@ -18,6 +18,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->sort_size = 0;
     args->sort_extension = 0;
     args->sort_version = 0;
+    args->sort_word = NULL;
     args->unsorted = 0;
     args->reverse = 0;
     args->dirs_first = 0;
@@ -61,6 +62,7 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"full-time", no_argument, 0, 6},
         {"file-type", no_argument, 0, 7},
         {"hide", required_argument, 0, 8},
+        {"sort", required_argument, 0, 9},
         {"quote-name", no_argument, 0, 'Q'},
         {"help", no_argument, 0, 1},
         {"version", no_argument, 0, 'V'},
@@ -206,6 +208,30 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             args->hide_patterns[args->hide_count++] = optarg;
             break;
+        case 9:
+            args->sort_word = optarg;
+            args->sort_time = args->sort_atime = args->sort_ctime = 0;
+            args->sort_size = args->sort_extension = args->sort_version = 0;
+            args->unsorted = 0;
+            if (strcmp(optarg, "none") == 0)
+                args->unsorted = 1;
+            else if (strcmp(optarg, "size") == 0)
+                args->sort_size = 1;
+            else if (strcmp(optarg, "time") == 0)
+                args->sort_time = 1;
+            else if (strcmp(optarg, "atime") == 0)
+                args->sort_atime = 1;
+            else if (strcmp(optarg, "ctime") == 0)
+                args->sort_ctime = 1;
+            else if (strcmp(optarg, "extension") == 0)
+                args->sort_extension = 1;
+            else if (strcmp(optarg, "version") == 0)
+                args->sort_version = 1;
+            else {
+                fprintf(stderr, "Invalid sort option: %s\n", optarg);
+                exit(1);
+            }
+            break;
         case 2:
             if (strcmp(optarg, "always") == 0)
                 args->color_mode = COLOR_ALWAYS;
@@ -219,7 +245,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
@@ -228,7 +254,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
