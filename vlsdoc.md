@@ -55,6 +55,7 @@ vls - colorized ls replacement
 - `-b` Use backslash escapes for non-printable characters.
 - `--quoting-style=STYLE` Select quoting style: `literal`, `c`, `escape`.
 - `-q`, `--hide-control-chars` Show `?` instead of non-printable characters.
+- `--show-control-chars` Display control characters directly.
 - `-1` List one entry per line.
 - `--color=WHEN` Control colorization. WHEN is `auto`, `always` or `never`.
 - `--help` Display a brief usage message and exit.
