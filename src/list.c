@@ -131,12 +131,13 @@ static int cmp_version(const void *a, const void *b) {
 #endif
 }
 
-static void human_size(off_t size, char *buf, size_t bufsz) {
+static void human_size(off_t size, int si, char *buf, size_t bufsz) {
     const char suffixes[] = {'B','K','M','G','T','P'};
     double s = (double)size;
     int i = 0;
-    while (s >= 1024 && i < 5) {
-        s /= 1024;
+    int base = si ? 1000 : 1024;
+    while (s >= base && i < 5) {
+        s /= base;
         i++;
     }
     if (i == 0)
@@ -229,7 +230,7 @@ static void print_quoted(const char *s, QuotingStyle style, int hide_control, in
         putchar('"');
 }
 
-void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperlink_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, const char *sort_word, int unsorted, int reverse, int dirs_first, int recursive, IndicatorStyle indicator_style, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, const char **hide_patterns, size_t hide_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, QuotingStyle quoting_style, const char *time_word, const char *time_style, unsigned block_size, int hide_control, int show_controls, int literal_names) {
+void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperlink_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, const char *sort_word, int unsorted, int reverse, int dirs_first, int recursive, IndicatorStyle indicator_style, int human_readable, int human_si, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, const char **hide_patterns, size_t hide_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, QuotingStyle quoting_style, const char *time_word, const char *time_style, unsigned block_size, int hide_control, int show_controls, int literal_names) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -295,7 +296,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
         if (long_format) {
             char size_buf[16];
             if (human_readable)
-                human_size(st.st_size, size_buf, sizeof(size_buf));
+                human_size(st.st_size, human_si, size_buf, sizeof(size_buf));
             else
                 snprintf(size_buf, sizeof(size_buf), "%lld", (long long)st.st_size);
 
@@ -559,7 +560,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
 
             char sz[16];
             if (human_readable)
-                human_size(ent->st.st_size, sz, sizeof(sz));
+                human_size(ent->st.st_size, human_si, sz, sizeof(sz));
             else
                 snprintf(sz, sizeof(sz), "%lld", (long long)ent->st.st_size);
             size_t len_sz = strlen(sz);
@@ -871,7 +872,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
         if (long_format || one_per_line || !columns) {
             char size_buf[16];
             if (human_readable)
-                human_size(ent->st.st_size, size_buf, sizeof(size_buf));
+                human_size(ent->st.st_size, human_si, size_buf, sizeof(size_buf));
             else
                 snprintf(size_buf, sizeof(size_buf), "%lld", (long long)ent->st.st_size);
 
@@ -991,7 +992,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, hyperlink_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, sort_word, unsorted, reverse, dirs_first, recursive, indicator_style, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, hide_patterns, hide_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quoting_style, time_word, time_style, block_size, hide_control, show_controls, literal_names);
+            list_directory(fullpath, color_mode, hyperlink_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, sort_word, unsorted, reverse, dirs_first, recursive, indicator_style, human_readable, human_si, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, hide_patterns, hide_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quoting_style, time_word, time_style, block_size, hide_control, show_controls, literal_names);
         }
     }
 

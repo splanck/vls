@@ -29,6 +29,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->follow_links = 0;
     args->deref_cmdline = 0;
     args->human_readable = 0;
+    args->human_si = 0;
     args->numeric_ids = 0;
     args->hide_owner = 0;
     args->hide_group = 0;
@@ -73,6 +74,7 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"hide-control-chars", no_argument, 0, 'q'},
         {"show-control-chars", no_argument, 0, 13},
         {"hyperlink", required_argument, 0, 14},
+        {"si", no_argument, 0, 15},
         {"help", no_argument, 0, 1},
         {"version", no_argument, 0, 'V'},
         {0, 0, 0, 0}
@@ -264,6 +266,9 @@ void parse_args(int argc, char *argv[], Args *args) {
                 exit(1);
             }
             break;
+        case 15:
+            args->human_si = 1;
+            break;
         case 8:
             args->hide_patterns = realloc(args->hide_patterns,
                                           (args->hide_count + 1) * sizeof(char *));
@@ -310,7 +315,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-N] [-q] [-V] [--color=WHEN] [--hyperlink=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--literal] [--hide-control-chars] [--show-control-chars] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [--si] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-N] [-q] [-V] [--color=WHEN] [--hyperlink=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--literal] [--hide-control-chars] [--show-control-chars] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
@@ -319,7 +324,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-N] [-q] [-V] [--color=WHEN] [--hyperlink=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--literal] [--hide-control-chars] [--show-control-chars] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [--si] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-N] [-q] [-V] [--color=WHEN] [--hyperlink=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--literal] [--hide-control-chars] [--show-control-chars] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
