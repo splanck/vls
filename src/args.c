@@ -42,8 +42,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->one_per_line = 0;
     args->comma_separated = 0;
     args->show_blocks = 0;
-    args->quote_names = 0;
-    args->escape_nonprint = 0;
+    args->quoting_style = QUOTE_LITERAL;
     args->time_word = NULL;
     args->time_style = "%b %e %H:%M";
     args->block_size = 0;
@@ -65,6 +64,7 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"hide", required_argument, 0, 8},
         {"sort", required_argument, 0, 9},
         {"quote-name", no_argument, 0, 'Q'},
+        {"quoting-style", required_argument, 0, 12},
         {"help", no_argument, 0, 1},
         {"version", no_argument, 0, 'V'},
         {0, 0, 0, 0}
@@ -173,10 +173,10 @@ void parse_args(int argc, char *argv[], Args *args) {
             args->numeric_ids = 1;
             break;
         case 'b':
-            args->escape_nonprint = 1;
+            args->quoting_style = QUOTE_ESCAPE;
             break;
         case 'Q':
-            args->quote_names = 1;
+            args->quoting_style = QUOTE_C;
             break;
         case 'k':
             args->block_size = 1024;
@@ -219,6 +219,18 @@ void parse_args(int argc, char *argv[], Args *args) {
                 args->indicator_style = INDICATOR_CLASSIFY;
             else {
                 fprintf(stderr, "Invalid indicator style: %s\n", optarg);
+                exit(1);
+            }
+            break;
+        case 12:
+            if (strcmp(optarg, "literal") == 0)
+                args->quoting_style = QUOTE_LITERAL;
+            else if (strcmp(optarg, "c") == 0)
+                args->quoting_style = QUOTE_C;
+            else if (strcmp(optarg, "escape") == 0)
+                args->quoting_style = QUOTE_ESCAPE;
+            else {
+                fprintf(stderr, "Invalid quoting style: %s\n", optarg);
                 exit(1);
             }
             break;
@@ -268,7 +280,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
@@ -277,7 +289,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--indicator-style=STYLE] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quoting-style=STYLE] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }

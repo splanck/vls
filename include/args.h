@@ -16,6 +16,12 @@ typedef enum {
     INDICATOR_CLASSIFY
 } IndicatorStyle;
 
+typedef enum {
+    QUOTE_LITERAL,
+    QUOTE_C,
+    QUOTE_ESCAPE
+} QuotingStyle;
+
 typedef struct {
     const char **paths;
     size_t path_count;
@@ -54,8 +60,7 @@ typedef struct {
     int one_per_line;
     int comma_separated;
     int show_blocks;
-    int quote_names;
-    int escape_nonprint;
+    QuotingStyle quoting_style;
     const char *time_word;
     const char *time_style;
     unsigned block_size;
