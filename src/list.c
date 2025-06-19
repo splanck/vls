@@ -280,17 +280,18 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
     size_t link_w = 0, owner_w = 0, group_w = 0, size_w = 0, block_w = 0;
     unsigned long total_blocks = 0;
     size_t max_len = 0;
-    if (long_format) {
-        for (size_t i = 0; i < count; i++) {
-            const Entry *ent = &entries[i];
-            size_t len;
-            if (show_blocks) {
-                unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
-                total_blocks += blk;
-                size_t d = num_digits(blk);
-                if (d > block_w)
-                    block_w = d;
-            }
+    for (size_t i = 0; i < count; i++) {
+        const Entry *ent = &entries[i];
+        unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
+        if (long_format || show_blocks)
+            total_blocks += blk;
+        if (show_blocks) {
+            size_t d = num_digits(blk);
+            if (d > block_w)
+                block_w = d;
+        }
+
+        if (long_format) {
             if (num_digits(ent->st.st_nlink) > link_w)
                 link_w = num_digits(ent->st.st_nlink);
 
@@ -313,38 +314,28 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                 human_size(ent->st.st_size, sz, sizeof(sz));
             else
                 snprintf(sz, sizeof(sz), "%lld", (long long)ent->st.st_size);
-            len = strlen(sz);
-            if (len > size_w)
-                size_w = len;
+            size_t len_sz = strlen(sz);
+            if (len_sz > size_w)
+                size_w = len_sz;
         }
-    }
 
-    for (size_t i = 0; i < count; i++) {
-        const Entry *ent = &entries[i];
-        size_t len = strlen(ent->name);
-        if (show_blocks) {
-            unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
-            total_blocks += blk;
-            size_t d = num_digits(blk);
-            if (d > block_w)
-                block_w = d;
-        }
+        size_t name_len = strlen(ent->name);
         if (show_inode)
-            len += num_digits(ent->st.st_ino) + 1;
+            name_len += num_digits(ent->st.st_ino) + 1;
         if (classify) {
             if (S_ISDIR(ent->st.st_mode) || (ent->st.st_mode & S_IXUSR) || S_ISLNK(ent->st.st_mode))
-                len += 1;
+                name_len += 1;
         } else if (slash_dirs && S_ISDIR(ent->st.st_mode)) {
-            len += 1;
+            name_len += 1;
         }
-        if (len > max_len)
-            max_len = len;
+        if (name_len > max_len)
+            max_len = name_len;
     }
 
     if (show_blocks)
         max_len += block_w + 1;
 
-    if (show_blocks)
+    if (long_format || show_blocks)
         printf("total %lu\n", total_blocks);
 
     if (!long_format && columns && !one_per_line) {

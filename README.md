@@ -21,6 +21,9 @@ Use `-F` to append indicators to entries: `/` for directories, `*` for executabl
 Use `-p` to append '/' to directory names.
 Use `-s` to display the number of blocks allocated to each file.
 Use `--block-size=SIZE` to override the default block size (512 or 1024 bytes).
+When `-l` or `-s` is specified, `vls` prints a `total <num>` line before the
+listing. The count sums the blocks of the shown files using the selected block
+size.
 Use `-h` to display file sizes in human readable units when combined with `-l`.
 Use `-L` to follow symbolic links when retrieving file details (the default is to display information about the links themselves).
 Use `-n` to show numeric user and group IDs in long-format output.
