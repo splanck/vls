@@ -189,7 +189,7 @@ static void print_quoted(const char *s, int quote, int escape_nonprint) {
         putchar('"');
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, int escape_nonprint, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, int escape_nonprint, const char *time_style, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -271,7 +271,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char time_buf[32];
             struct tm *tm = localtime(sort_atime ? &st.st_atime :
                                        sort_ctime ? &st.st_ctime : &st.st_mtime);
-            strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
+            strftime(time_buf, sizeof(time_buf), time_style, tm);
 
             if (show_blocks)
                 printf("%*lu ", (int)single_w, single_blocks);
@@ -736,7 +736,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             struct tm *tm = localtime(sort_atime ? &ent->st.st_atime :
                                        sort_ctime ? &ent->st.st_ctime :
                                        &ent->st.st_mtime);
-            strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
+            strftime(time_buf, sizeof(time_buf), time_style, tm);
 
             if (show_blocks)
                 printf("%*lu ", (int)block_w, blk);
@@ -794,7 +794,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, escape_nonprint, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, escape_nonprint, time_style, block_size);
         }
     }
 

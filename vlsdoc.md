@@ -22,6 +22,8 @@ vls - colorized ls replacement
 - `-v` Sort by version (natural order).
 - `-f`, `-U` Do not sort; list entries in directory order.
 - `--group-directories-first` List directories before other files.
+- `--time-style=FMT` Format times using `strftime(3)` style FMT.
+- `--full-time` Equivalent to `--time-style="%F %T %z"`.
 - `-r` Reverse the sort order.
 - `-R` List subdirectories recursively (symbolic links are not followed).
 - `-d` List directory arguments themselves instead of their contents.
