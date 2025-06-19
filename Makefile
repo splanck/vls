@@ -52,7 +52,7 @@ build:
 
 test: build/vls
 	@echo "Running tests..."
-	mkdir -p build/testdir
+	mkdir -p build/testdir build/emptydir
 	touch build/testdir/foo build/testdir/.bar
 	@set -e; \
 	./build/vls -A build/testdir > build/out_A.txt; rc=$$?; \
@@ -73,7 +73,10 @@ test: build/vls
 	./build/vls --color=never build/testdir > build/out_color_off.txt; rc=$$?; \
 	echo $$rc > build/rc_color_off.txt; test $$rc -eq 0; \
 	! grep -P -q '\x1b\[' build/out_color_off.txt; \
-	rm -r build/testdir; \
+	./build/vls -C build/emptydir > build/out_empty.txt; rc=$$?; \
+	echo $$rc > build/rc_empty.txt; test $$rc -eq 0; \
+grep -q '^$$' build/out_empty.txt; \
+	rm -r build/testdir build/emptydir; \
 	echo "Tests completed"
 
 install: build/vls

@@ -774,14 +774,17 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             }
         }
     } else if (!long_format && columns && !one_per_line) {
-        int term_width = output_width;
-        size_t col_width = ((max_len + tabsize - 1) / tabsize) * tabsize + 2;
-        size_t cols = term_width / (int)col_width;
-        if (cols == 0)
-            cols = 1;
-        if (cols > count)
-            cols = count;
-        size_t rows = (count + cols - 1) / cols;
+        if (count == 0) {
+            putchar('\n');
+        } else {
+            int term_width = output_width;
+            size_t col_width = ((max_len + tabsize - 1) / tabsize) * tabsize + 2;
+            size_t cols = term_width / (int)col_width;
+            if (cols == 0)
+                cols = 1;
+            if (cols > count)
+                cols = count;
+            size_t rows = (count + cols - 1) / cols;
 
         if (across_columns) {
             for (size_t i = 0; i < count; i++) {
@@ -926,6 +929,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                     }
                 }
             }
+        }
         }
     } else {
     for (size_t i = 0; i < count; i++) {
