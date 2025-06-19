@@ -37,6 +37,7 @@ typedef struct {
     int show_context;
     int classify;
     int slash_dirs;
+    int file_type_only;
     int ignore_backups;
     const char **ignore_patterns;
     size_t ignore_count;
