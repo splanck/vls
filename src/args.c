@@ -46,6 +46,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->show_blocks = 0;
     args->quote_names = 0;
     args->escape_nonprint = 0;
+    args->time_word = NULL;
     args->time_style = "%b %e %H:%M";
     args->block_size = 0;
     args->paths = NULL;
@@ -60,6 +61,7 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"group-directories-first", no_argument, 0, 4},
         {"time-style", required_argument, 0, 5},
         {"full-time", no_argument, 0, 6},
+        {"time", required_argument, 0, 10},
         {"file-type", no_argument, 0, 7},
         {"hide", required_argument, 0, 8},
         {"sort", required_argument, 0, 9},
@@ -196,6 +198,14 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 6:
             args->time_style = "%F %T %z";
             break;
+        case 10:
+            args->time_word = optarg;
+            if (strcmp(optarg, "mod") != 0 && strcmp(optarg, "access") != 0 &&
+                strcmp(optarg, "use") != 0 && strcmp(optarg, "status") != 0) {
+                fprintf(stderr, "Invalid time option: %s\n", optarg);
+                exit(1);
+            }
+            break;
         case 7:
             args->file_type_only = 1;
             break;
@@ -245,7 +255,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
@@ -254,7 +264,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--time=WORD] [--file-type] [--almost-all] [--ignore=PAT] [--hide=PAT] [--sort=WORD] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }

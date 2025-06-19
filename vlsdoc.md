@@ -26,6 +26,8 @@ vls - colorized ls replacement
 - `--group-directories-first` List directories before other files.
 - `--time-style=FMT` Format times using `strftime(3)` style FMT.
 - `--full-time` Equivalent to `--time-style="%F %T %z"`.
+- `--time=WORD` Choose which timestamp field to display: `mod` (default),
+  `access`, `use` or `status`.
 - `-r` Reverse the sort order.
 - `-R` List subdirectories recursively (symbolic links are not followed).
 - `-d` List directory arguments themselves instead of their contents.
