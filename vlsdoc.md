@@ -54,6 +54,7 @@ vls - colorized ls replacement
 - `-Q`, `--quote-name` Use C-style quoting for file names.
 - `-b` Use backslash escapes for non-printable characters.
 - `--quoting-style=STYLE` Select quoting style: `literal`, `c`, `escape`.
+- `-N`, `--literal` Print file names literally, overriding quoting and escaping options.
 - `-q`, `--hide-control-chars` Show `?` instead of non-printable characters.
 - `--show-control-chars` Display control characters directly.
 - `-1` List one entry per line.
