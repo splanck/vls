@@ -9,6 +9,7 @@ Color definitions respect the `LS_COLORS` environment variable when set.
 Use `-r` to display entries in reverse alphabetical order.
 Use `-t` to sort entries by modification time.
 Use `-u` to sort entries by access time. With `-l`, access time is shown.
+Use `-c` to sort entries by status change time. With `-l`, change time is shown.
 Use `-S` to sort entries by file size.
 Use `-X` to sort entries by file extension.
 Use `-f` (or `-U`) to disable sorting and list entries in directory order.
