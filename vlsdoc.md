@@ -19,6 +19,7 @@ vls - colorized ls replacement
 - `-c` Sort by status change time, newest first. When combined with `-l`, display change time instead of modification time.
 - `-S` Sort by file size, largest first.
 - `-X` Sort by file extension, case-insensitive.
+- `-v` Sort by version (natural order).
 - `-f`, `-U` Do not sort; list entries in directory order.
 - `--group-directories-first` List directories before other files.
 - `-r` Reverse the sort order.
