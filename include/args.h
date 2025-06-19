@@ -9,6 +9,13 @@ typedef enum {
     COLOR_AUTO
 } ColorMode;
 
+typedef enum {
+    INDICATOR_NONE,
+    INDICATOR_SLASH,
+    INDICATOR_FILE_TYPE,
+    INDICATOR_CLASSIFY
+} IndicatorStyle;
+
 typedef struct {
     const char **paths;
     size_t path_count;
@@ -36,9 +43,7 @@ typedef struct {
     int hide_owner;
     int hide_group;
     int show_context;
-    int classify;
-    int slash_dirs;
-    int file_type_only;
+    IndicatorStyle indicator_style;
     int ignore_backups;
     const char **ignore_patterns;
     size_t ignore_count;
