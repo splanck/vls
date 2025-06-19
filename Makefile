@@ -13,8 +13,8 @@ else ifeq ($(UNAME_S),Linux)
     PLATFORM_CFLAGS = -D_GNU_SOURCE
 endif
 CFLAGS += $(PLATFORM_CFLAGS)
-OBJS = build/main.o build/list.o build/color.o build/args.o
-DEPS = include/list.h include/color.h include/args.h
+OBJS = build/main.o build/list.o build/color.o build/args.o build/util.o
+DEPS = include/list.h include/color.h include/args.h include/util.h
 
 all: build/vls
 
@@ -32,6 +32,9 @@ build/color.o: src/color.c include/color.h | build
 
 build/args.o: src/args.c include/args.h | build
 	$(CC) $(CFLAGS) -c src/args.c -o build/args.o
+
+build/util.o: src/util.c include/util.h | build
+	$(CC) $(CFLAGS) -c src/util.c -o build/util.o
 
 build:
 	mkdir -p build

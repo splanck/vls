@@ -34,6 +34,7 @@
 #endif
 #include "list.h"
 #include "color.h"
+#include "util.h"
 
 static int hyperlink_enabled(HyperlinkMode mode) {
     return mode == HYPERLINK_ALWAYS || (mode == HYPERLINK_AUTO && isatty(STDOUT_FILENO));
@@ -463,14 +464,19 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             perror("strdup");
             goto cleanup;
         }
-        char fullpath[PATH_MAX];
-        snprintf(fullpath, sizeof(fullpath), "%s/%s", path, entries[count].name);
+        char *fullpath = join_path(path, entries[count].name);
+        if (!fullpath) {
+            perror("malloc");
+            goto cleanup;
+        }
         int (*stat_fn)(const char *, struct stat *) = follow_links ? stat : lstat;
         if (stat_fn(fullpath, &entries[count].st) == -1) {
             perror("stat");
+            free(fullpath);
             free(entries[count].name);
             continue;
         }
+        free(fullpath);
         count++;
     }
 
@@ -660,13 +666,17 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                 putchar('\n');
                 line_len = 0;
             }
-            char fullpath[PATH_MAX];
-            snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
+            char *fullpath = join_path(path, ent->name);
+            if (!fullpath) {
+                perror("malloc");
+                goto cleanup;
+            }
             printf("%s%s%s", block_buf, inode_buf, prefix);
             hyperlink_start(fullpath, hyperlink_mode);
             print_quoted(ent->name, quoting_style, hide_control, show_controls, literal_names);
             hyperlink_end(hyperlink_mode);
             printf("%s%s", suffix, indicator);
+            free(fullpath);
             line_len += len;
             if (i < count - 1) {
                 if (line_len + 2 > (size_t)term_width) {
@@ -737,13 +747,17 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             char inode_buf[32] = "";
             if (show_inode)
                 snprintf(inode_buf, sizeof(inode_buf), "%10llu ", (unsigned long long)ent->st.st_ino);
-            char fullpath[PATH_MAX];
-            snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
+            char *fullpath = join_path(path, ent->name);
+            if (!fullpath) {
+                perror("malloc");
+                goto cleanup;
+            }
             printf("%s%s%s", block_buf, inode_buf, prefix);
             hyperlink_start(fullpath, hyperlink_mode);
             print_quoted(ent->name, quoting_style, hide_control, show_controls, literal_names);
             hyperlink_end(hyperlink_mode);
             printf("%s%s", suffix, indicator);
+            free(fullpath);
 
             size_t len = (quote_names ? quoted_len(ent->name, escape_nonprint, hide_control) :
                            (escape_nonprint ? escaped_len(ent->name, hide_control) : strlen(ent->name))) +
@@ -806,13 +820,17 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                     char inode_buf[32] = "";
                     if (show_inode)
                         snprintf(inode_buf, sizeof(inode_buf), "%10llu ", (unsigned long long)ent->st.st_ino);
-                    char fullpath[PATH_MAX];
-                    snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
+                    char *fullpath = join_path(path, ent->name);
+                    if (!fullpath) {
+                        perror("malloc");
+                        goto cleanup;
+                    }
                     printf("%s%s%s", block_buf, inode_buf, prefix);
                     hyperlink_start(fullpath, hyperlink_mode);
                     print_quoted(ent->name, quoting_style, hide_control, show_controls, literal_names);
                     hyperlink_end(hyperlink_mode);
                     printf("%s%s", suffix, indicator);
+                    free(fullpath);
 
                     size_t len = (quote_names ? quoted_len(ent->name, escape_nonprint, hide_control) :
                                    (escape_nonprint ? escaped_len(ent->name, hide_control) : strlen(ent->name))) +
@@ -935,44 +953,60 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             if (show_context) {
 #if HAVE_SELINUX
                 char *ctx = NULL;
-                char fullpath[PATH_MAX];
-                snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
+                char *fullpath = join_path(path, ent->name);
+                if (!fullpath) {
+                    perror("malloc");
+                    goto cleanup;
+                }
                 if (lgetfilecon(fullpath, &ctx) >= 0) {
                     printf(" %s", ctx);
                     freecon(ctx);
                 } else {
                     printf(" -");
                 }
+                free(fullpath);
 #else
                 printf(" -");
 #endif
             }
             printf(" %s", prefix);
-            char fullpath1[PATH_MAX];
-            snprintf(fullpath1, sizeof(fullpath1), "%s/%s", path, ent->name);
+            char *fullpath1 = join_path(path, ent->name);
+            if (!fullpath1) {
+                perror("malloc");
+                goto cleanup;
+            }
             hyperlink_start(fullpath1, hyperlink_mode);
             print_quoted(ent->name, quoting_style, hide_control, show_controls, literal_names);
             hyperlink_end(hyperlink_mode);
             printf("%s%s\n", suffix, indicator);
+            free(fullpath1);
         } else {
             if (show_blocks)
                 printf("%*lu ", (int)block_w, blk);
             if (show_inode) {
                 printf("%10llu %s", (unsigned long long)ent->st.st_ino, prefix);
-                char fullpath2[PATH_MAX];
-                snprintf(fullpath2, sizeof(fullpath2), "%s/%s", path, ent->name);
+                char *fullpath2 = join_path(path, ent->name);
+                if (!fullpath2) {
+                    perror("malloc");
+                    goto cleanup;
+                }
                 hyperlink_start(fullpath2, hyperlink_mode);
                 print_quoted(ent->name, quoting_style, hide_control, show_controls, literal_names);
                 hyperlink_end(hyperlink_mode);
                 printf("%s%s\n", suffix, indicator);
+                free(fullpath2);
             } else {
                 fputs(prefix, stdout);
-                char fullpath3[PATH_MAX];
-                snprintf(fullpath3, sizeof(fullpath3), "%s/%s", path, ent->name);
+                char *fullpath3 = join_path(path, ent->name);
+                if (!fullpath3) {
+                    perror("malloc");
+                    goto cleanup;
+                }
                 hyperlink_start(fullpath3, hyperlink_mode);
                 print_quoted(ent->name, quoting_style, hide_control, show_controls, literal_names);
                 hyperlink_end(hyperlink_mode);
                 printf("%s%s\n", suffix, indicator);
+                free(fullpath3);
             }
         }
     }
@@ -987,10 +1021,14 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                 continue;
             if (strcmp(ent->name, ".") == 0 || strcmp(ent->name, "..") == 0)
                 continue;
-            char fullpath[PATH_MAX];
-            snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
+            char *fullpath = join_path(path, ent->name);
+            if (!fullpath) {
+                perror("malloc");
+                goto cleanup;
+            }
             printf("\n");
             list_directory(fullpath, color_mode, hyperlink_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, sort_word, unsorted, reverse, dirs_first, recursive, indicator_style, human_readable, human_si, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, hide_patterns, hide_count, columns, across_columns, one_per_line, comma_separated, output_width, tabsize, show_blocks, quoting_style, time_word, time_style, block_size, hide_control, show_controls, literal_names);
+            free(fullpath);
         }
     }
 
