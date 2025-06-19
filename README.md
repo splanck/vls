@@ -45,9 +45,11 @@ destination.
 ## Testing
 Run `make test` to compile `vls` and execute a small regression suite.
 The tests create a temporary directory under `build/` and exercise
-options such as `-A`, `-d`, `-C`, `-m` and colorized output.  Output is
-captured to files in `build/` and exit codes are checked.  A message is
-printed once all tests pass.
+options such as `-A`, `-d`, `-C`, `-m` and both `--color=always` and
+`--color=never`. Output and the exit status for each invocation are
+saved in `build/` for inspection. The script verifies that every command
+succeeds and prints expected data. A message is printed once all tests
+pass.
 
 ## License
 Distributed under the GNU General Public License version 3.
