@@ -4,6 +4,7 @@ A minimal, colorized replacement for `ls`.
 
 ## Features
 - Colorizes output based on file type with `LS_COLORS` customization
+- Optional OSC 8 hyperlinks with `--hyperlink=WHEN`
 - Supports long listings and sorting with `--sort=WORD` (time, size, atime, ctime, extension, version, none)
 - Recursive listing and directory-first ordering
 - Indicator characters configurable with `--indicator-style=STYLE` (`none`, `slash`, `file-type`, `classify`)

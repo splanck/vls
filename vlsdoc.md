@@ -59,6 +59,8 @@ vls - colorized ls replacement
 - `--show-control-chars` Display control characters directly.
 - `-1` List one entry per line.
 - `--color=WHEN` Control colorization. WHEN is `auto`, `always` or `never`.
+- `--hyperlink=WHEN` Wrap file names in OSC 8 hyperlinks when WHEN is `auto`,
+  `always` or `never`.
 - `--help` Display a brief usage message and exit.
 - `-V`, `--version` Display the program version and exit.
 
@@ -76,6 +78,7 @@ vls -I '*.o'
 vls --hide='*.tmp'
 vls -b
 vls --indicator-style=classify
+vls --hyperlink=always
 ```
 
 ## See Also

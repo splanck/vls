@@ -22,10 +22,17 @@ typedef enum {
     QUOTE_ESCAPE
 } QuotingStyle;
 
+typedef enum {
+    HYPERLINK_NEVER,
+    HYPERLINK_ALWAYS,
+    HYPERLINK_AUTO
+} HyperlinkMode;
+
 typedef struct {
     const char **paths;
     size_t path_count;
     ColorMode color_mode;
+    HyperlinkMode hyperlink_mode;
     int show_hidden;
     int almost_all;
     int long_format;
