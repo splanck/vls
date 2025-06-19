@@ -29,6 +29,8 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->hide_owner = 0;
     args->hide_group = 0;
     args->ignore_backups = 0;
+    args->ignore_patterns = NULL;
+    args->ignore_count = 0;
     args->columns = isatty(STDOUT_FILENO);
     args->one_per_line = 0;
     args->show_blocks = 0;
@@ -39,6 +41,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     static struct option long_options[] = {
         {"color", required_argument, 0, 2},
         {"almost-all", no_argument, 0, 'A'},
+        {"ignore", required_argument, 0, 'I'},
         {"ignore-backups", no_argument, 0, 'B'},
         {"block-size", required_argument, 0, 3},
         {"group-directories-first", no_argument, 0, 4},
@@ -47,7 +50,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpBhLdgonC1s", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpI:BhLdgonC1s", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -91,6 +94,15 @@ void parse_args(int argc, char *argv[], Args *args) {
             break;
         case 'p':
             args->slash_dirs = 1;
+            break;
+        case 'I':
+            args->ignore_patterns = realloc(args->ignore_patterns,
+                                            (args->ignore_count + 1) * sizeof(char *));
+            if (!args->ignore_patterns) {
+                perror("realloc");
+                exit(1);
+            }
+            args->ignore_patterns[args->ignore_count++] = optarg;
             break;
         case 'B':
             args->ignore_backups = 1;
@@ -145,12 +157,12 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }

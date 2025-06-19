@@ -103,6 +103,9 @@ Omit the group column in long format output.
 .BR -B , --ignore-backups
 Do not list files ending with '~'.
 .TP
+.BR -I " PATTERN" , --ignore=PATTERN
+Do not list entries matching the shell PATTERN. May be repeated.
+.TP
 .BR -C
 Force multi-column output.
 .TP
@@ -127,5 +130,8 @@ Recursively list /etc sorted by modification time.
 .TP
 .B vls --color=never
 List current directory without colorization.
+.TP
+.B vls -I '*.o'
+Ignore files ending in .o
 .SH SEE ALSO
 .BR ls (1)
