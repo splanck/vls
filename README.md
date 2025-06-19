@@ -4,7 +4,7 @@ A minimal, colorized replacement for `ls`.
 
 ## Features
 - Colorizes output based on file type with `LS_COLORS` customization
-- Supports long listings and various sorting modes (time, size, extension)
+- Supports long listings and various sorting modes (time, size, extension, version)
 - Recursive listing and directory-first ordering
 - Pattern ignoring and indicator characters ("/", "*", "@")
 - Optional dereferencing of command line symlinks (`-H`)

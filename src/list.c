@@ -7,6 +7,7 @@
 #include <limits.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <sys/ioctl.h>
 #include <pwd.h>
 #include <grp.h>
@@ -87,6 +88,35 @@ static int cmp_extension(const void *a, const void *b) {
     return cmp;
 }
 
+static int cmp_version(const void *a, const void *b) {
+    const Entry *ea = a;
+    const Entry *eb = b;
+#if defined(__GLIBC__) || defined(__GNU_LIBRARY__) || defined(__linux__)
+    return strverscmp(ea->name, eb->name);
+#else
+    const char *sa = ea->name;
+    const char *sb = eb->name;
+    while (*sa && *sb) {
+        if (isdigit((unsigned char)*sa) && isdigit((unsigned char)*sb)) {
+            char *ea_end; char *eb_end;
+            unsigned long na = strtoul(sa, &ea_end, 10);
+            unsigned long nb = strtoul(sb, &eb_end, 10);
+            if (na != nb)
+                return (na > nb) ? 1 : -1;
+            sa = ea_end;
+            sb = eb_end;
+        } else {
+            if (*sa != *sb)
+                return (unsigned char)*sa - (unsigned char)*sb;
+            sa++; sb++;
+        }
+    }
+    if (*sa) return 1;
+    if (*sb) return -1;
+    return 0;
+#endif
+}
+
 static void human_size(off_t size, char *buf, size_t bufsz) {
     const char suffixes[] = {'B','K','M','G','T','P'};
     double s = (double)size;
@@ -134,7 +164,7 @@ static void print_quoted(const char *s, int quote) {
     putchar('"');
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -336,6 +366,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             cmp = cmp_ctime;
         else if (sort_extension)
             cmp = cmp_extension;
+        else if (sort_version)
+            cmp = cmp_version;
         qsort(entries, count, sizeof(Entry), cmp);
     }
 
@@ -731,7 +763,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, block_size);
         }
     }
 

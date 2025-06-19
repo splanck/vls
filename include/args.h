@@ -22,6 +22,7 @@ typedef struct {
     int sort_ctime;
     int sort_size;
     int sort_extension;
+    int sort_version;
     int unsorted;
     int reverse;
     int dirs_first;
