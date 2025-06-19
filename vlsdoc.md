@@ -39,7 +39,8 @@ vls - colorized ls replacement
 - `--file-type` Like `-p` but ignores other indicators unless `-F` is also given.
 - `--indicator-style=STYLE` Choose indicator style: `none`, `slash`, `file-type`, `classify`.
 - `-s` Display the number of blocks allocated to each file. When used with `-l` or `-s`, a line of the form `total <num>` appears before the listing showing the sum of blocks for the displayed files according to the current block size.
-- `--block-size=SIZE` Override the default block size (512 or 1024 bytes).
+- `--block-size=SIZE` Override the default block size. `SIZE` is a number of
+  bytes with no unit suffix.
 - `-k` Use 1 KiB blocks for size calculations.
 - `-h` With `-l`, print sizes in human readable format using powers of 1024.
 - `--si` Like `-h` but use powers of 1000.
