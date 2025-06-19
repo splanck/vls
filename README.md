@@ -1,43 +1,11 @@
 # vls
 ls replacement utility for UNIX
 
-vls is a minimal tool intended as a replacement for the standard `ls` command.
+`vls` is a minimal tool intended as a replacement for the standard `ls` command.
 
-File names are colorized based on type (directories, links and executables).
-Use `--color=WHEN` to control coloring where `WHEN` is `auto`, `always` or `never`.
-Color definitions respect the `LS_COLORS` environment variable when set.
-Use `-r` to display entries in reverse alphabetical order.
-Use `-t` to sort entries by modification time.
-Use `-u` to sort entries by access time. With `-l`, access time is shown.
-Use `-c` to sort entries by status change time. With `-l`, change time is shown.
-Use `-S` to sort entries by file size.
-Use `-X` to sort entries by file extension.
-Use `-f` (or `-U`) to disable sorting and list entries in directory order.
-Use `--group-directories-first` to list directories before other files.
-Use `-i` to display inode numbers.
-Use `-A` or `--almost-all` to show hidden entries except `.` and `..`.
-Use `-R` to recursively list subdirectories (symbolic links are not followed).
-Use `-d` to list directory arguments themselves rather than their contents.
-Use `-F` to append indicators to entries: `/` for directories, `*` for executables and `@` for symbolic links.
-Use `-p` to append '/' to directory names.
-Use `-s` to display the number of blocks allocated to each file.
-Use `--block-size=SIZE` to override the default block size (512 or 1024 bytes).
-When `-l` or `-s` is specified, `vls` prints a `total <num>` line before the
-listing. The count sums the blocks of the shown files using the selected block
-size.
-Use `-h` to display file sizes in human readable units when combined with `-l`.
-Use `-L` to follow symbolic links when retrieving file details (the default is to display information about the links themselves).
-Use `-n` to show numeric user and group IDs in long-format output.
-Use `-g` to omit owner names in long format.
-Use `-o` to omit group names in long format.
-Use `-B` or `--ignore-backups` to skip entries ending with '~'.
-Use `-I PATTERN` or `--ignore=PATTERN` to exclude matching entries. Repeat for multiple patterns.
-Use `-C` to display entries in columns and `-1` to list one per line.
-Use `-Q` or `--quote-name` to wrap file names in double quotes, escaping
-any internal quotes or backslashes.
-Use `-V` or `--version` to print the version and exit.
-You may specify one or more paths to list. When multiple targets are given,
-`vls` prints a heading before each listing just like `ls`.
+File names are colorized based on type (directories, links and executables). Use `--color=WHEN` to control coloring where `WHEN` is `auto`, `always` or `never`. The color scheme can be customized through the `LS_COLORS` environment variable.
+
+See [vlsdoc.md](./vlsdoc.md) for a complete description of command-line options, environment variables and additional usage examples.
 
 Example of long format output:
 
