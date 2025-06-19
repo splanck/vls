@@ -5,6 +5,7 @@
 #include "quote.h"
 #include <sys/stat.h>
 #include <ctype.h>
+#include <locale.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -25,6 +26,7 @@ static void hyperlink_end(HyperlinkMode mode) {
 
 
 int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, "");
     Args args;
     parse_args(argc, argv, &args);
     color_init();
