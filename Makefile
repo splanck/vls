@@ -51,10 +51,27 @@ build:
 	mkdir -p build
 
 test: build/vls
-	./build/vls -a > /dev/null
-	./build/vls -l > /dev/null
-	./build/vls --color=never > /dev/null
-	@echo "Tests completed"
+	@echo "Running tests..."
+	mkdir -p build/testdir
+	touch build/testdir/foo build/testdir/.bar
+	@set -e; \
+	./build/vls -A build/testdir > build/out_A.txt; \
+	test $$? -eq 0; \
+	grep -q '.bar' build/out_A.txt; \
+	./build/vls -d build/testdir > build/out_d.txt; \
+	test $$? -eq 0; \
+	grep -q 'testdir' build/out_d.txt; \
+	./build/vls -C build/testdir > build/out_C.txt; \
+	test $$? -eq 0; \
+	test -s build/out_C.txt; \
+	./build/vls -m build/testdir > build/out_m.txt; \
+	test $$? -eq 0; \
+	test -s build/out_m.txt; \
+	./build/vls --color=always build/testdir > build/out_color.txt; \
+	test $$? -eq 0; \
+	grep -P -q '\x1b\[' build/out_color.txt; \
+	rm -r build/testdir; \
+	echo "Tests completed"
 
 install: build/vls
 	install -d $(DESTDIR)$(PREFIX)/bin

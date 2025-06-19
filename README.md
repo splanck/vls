@@ -42,6 +42,13 @@ SELinux support requires the libselinux development package to be installed.
 Install with `sudo make install`. Use `PREFIX` to choose a different
 destination.
 
+## Testing
+Run `make test` to compile `vls` and execute a small regression suite.
+The tests create a temporary directory under `build/` and exercise
+options such as `-A`, `-d`, `-C`, `-m` and colorized output.  Output is
+captured to files in `build/` and exit codes are checked.  A message is
+printed once all tests pass.
+
 ## License
 Distributed under the GNU General Public License version 3.
 See [LICENSE](./LICENSE) for details.
