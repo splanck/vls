@@ -13,6 +13,7 @@ A minimal, colorized replacement for `ls`.
 - Optional display of SELinux contexts (`-Z`, Linux only)
 - Quoting styles with `--quoting-style=STYLE` (`literal`, `c`, `escape`),
   with `-Q` and `-b` as shortcuts
+- Print names literally with `-N`/`--literal`, overriding quoting and escaping options
 - Hide control characters with `-q`/`--hide-control-chars`
 - Display control characters literally with `--show-control-chars`
 - Human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
