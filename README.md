@@ -6,7 +6,7 @@ A minimal, colorized replacement for `ls`.
 - Colorizes output based on file type with `LS_COLORS` customization
 - Supports long listings and various sorting modes (time, size, extension, version)
 - Recursive listing and directory-first ordering
-- Pattern ignoring and indicator characters ("/", "*", "@")
+- Pattern ignoring and indicator characters ("/", "*", "@"); use `--file-type` for directory markers only
 - Optional dereferencing of command line symlinks (`-H`)
 - Optional display of SELinux contexts (`-Z`, Linux only)
 - Options for quoting names, human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
