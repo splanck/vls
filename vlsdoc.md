@@ -37,6 +37,7 @@ vls - colorized ls replacement
 - `-I PATTERN`, `--ignore=PATTERN` Do not list entries matching the shell PATTERN. May be repeated.
 - `-C` List entries vertically in columns (default for terminals).
 - `-x` List entries across columns instead of vertically.
+- `-m` List entries separated by ", " wrapping lines to terminal width.
 - `-Q`, `--quote-name` Quote file names with double quotes, escaping internal quotes and backslashes.
 - `-1` List one entry per line.
 - `--color=WHEN` Control colorization. WHEN is `auto`, `always` or `never`.

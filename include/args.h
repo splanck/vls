@@ -40,6 +40,7 @@ typedef struct {
     int columns;
     int across_columns;
     int one_per_line;
+    int comma_separated;
     int show_blocks;
     int quote_names;
     unsigned block_size;
