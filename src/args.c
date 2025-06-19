@@ -14,6 +14,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->sort_time = 0;
     args->sort_atime = 0;
     args->sort_size = 0;
+    args->sort_extension = 0;
     args->unsorted = 0;
     args->reverse = 0;
     args->recursive = 0;
@@ -40,7 +41,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtruUfhRFpBhLdgonC1", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtruUfhXRFpBhLdgonC1", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -62,6 +63,9 @@ void parse_args(int argc, char *argv[], Args *args) {
             break;
         case 'S':
             args->sort_size = 1;
+            break;
+        case 'X':
+            args->sort_extension = 1;
             break;
         case 'f':
         case 'U':
@@ -119,12 +123,12 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
             exit(1);
         }
     }
