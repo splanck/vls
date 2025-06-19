@@ -41,6 +41,8 @@ typedef struct {
     int ignore_backups;
     const char **ignore_patterns;
     size_t ignore_count;
+    const char **hide_patterns;
+    size_t hide_count;
     int columns;
     int across_columns;
     int one_per_line;

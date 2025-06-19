@@ -189,7 +189,7 @@ static void print_quoted(const char *s, int quote, int escape_nonprint) {
         putchar('"');
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int file_type_only, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, int escape_nonprint, const char *time_style, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int file_type_only, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, const char **hide_patterns, size_t hide_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, int escape_nonprint, const char *time_style, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -341,6 +341,14 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             continue;
         if (almost_all && (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0))
             continue;
+        if (hide_patterns && !show_hidden && !almost_all) {
+            int hide = 0;
+            for (size_t i = 0; i < hide_count && !hide; i++)
+                if (fnmatch(hide_patterns[i], entry->d_name, 0) == 0)
+                    hide = 1;
+            if (hide)
+                continue;
+        }
         if (ignore_backups) {
             size_t len = strlen(entry->d_name);
             if (len > 0 && entry->d_name[len - 1] == '~')
@@ -794,7 +802,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, file_type_only, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, escape_nonprint, time_style, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, file_type_only, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, hide_patterns, hide_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, escape_nonprint, time_style, block_size);
         }
     }
 

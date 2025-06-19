@@ -53,8 +53,9 @@ int main(int argc, char *argv[]) {
                               args.classify, args.slash_dirs, args.file_type_only, args.human_readable,
                               args.numeric_ids, args.hide_owner, args.hide_group,
                               args.show_context, 1, 1, args.ignore_backups,
-                                args.ignore_patterns, args.ignore_count, args.columns,
-                                args.across_columns, args.one_per_line, args.comma_separated,
+                                args.ignore_patterns, args.ignore_count,
+                                args.hide_patterns, args.hide_count,
+                                args.columns, args.across_columns, args.one_per_line, args.comma_separated,
                                 args.show_blocks, args.quote_names, args.escape_nonprint, args.time_style, args.block_size);
                 if (i < args.path_count - 1)
                     printf("\n");
@@ -69,8 +70,9 @@ int main(int argc, char *argv[]) {
                       args.classify, args.slash_dirs, args.file_type_only, args.human_readable,
                       args.numeric_ids, args.hide_owner, args.hide_group,
                       args.show_context, args.follow_links, args.list_dirs_only, args.ignore_backups,
-                        args.ignore_patterns, args.ignore_count, args.columns,
-                        args.across_columns, args.one_per_line, args.comma_separated,
+                        args.ignore_patterns, args.ignore_count,
+                        args.hide_patterns, args.hide_count,
+                        args.columns, args.across_columns, args.one_per_line, args.comma_separated,
                         args.show_blocks, args.quote_names, args.escape_nonprint, args.time_style, args.block_size);
         if (i < args.path_count - 1)
             printf("\n");

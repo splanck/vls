@@ -7,6 +7,7 @@ A minimal, colorized replacement for `ls`.
 - Supports long listings and various sorting modes (time, size, extension, version)
 - Recursive listing and directory-first ordering
 - Pattern ignoring and indicator characters ("/", "*", "@"); use `--file-type` for directory markers only
+- Hide entries matching glob patterns with `--hide=PATTERN`
 - Optional dereferencing of command line symlinks (`-H`)
 - Optional display of SELinux contexts (`-Z`, Linux only)
 - Options for quoting names, human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
