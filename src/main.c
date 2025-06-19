@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
                               args.show_context, 1, 1, args.ignore_backups,
                                 args.ignore_patterns, args.ignore_count, args.columns,
                                 args.across_columns, args.one_per_line, args.comma_separated,
-                                args.show_blocks, args.quote_names, args.escape_nonprint, args.block_size);
+                                args.show_blocks, args.quote_names, args.escape_nonprint, args.time_style, args.block_size);
                 if (i < args.path_count - 1)
                     printf("\n");
                 continue;
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
                       args.show_context, args.follow_links, args.list_dirs_only, args.ignore_backups,
                         args.ignore_patterns, args.ignore_count, args.columns,
                         args.across_columns, args.one_per_line, args.comma_separated,
-                        args.show_blocks, args.quote_names, args.escape_nonprint, args.block_size);
+                        args.show_blocks, args.quote_names, args.escape_nonprint, args.time_style, args.block_size);
         if (i < args.path_count - 1)
             printf("\n");
     }

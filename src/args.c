@@ -42,6 +42,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->show_blocks = 0;
     args->quote_names = 0;
     args->escape_nonprint = 0;
+    args->time_style = "%b %e %H:%M";
     args->block_size = 0;
     args->paths = NULL;
     args->path_count = 0;
@@ -53,6 +54,8 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"ignore-backups", no_argument, 0, 'B'},
         {"block-size", required_argument, 0, 3},
         {"group-directories-first", no_argument, 0, 4},
+        {"time-style", required_argument, 0, 5},
+        {"full-time", no_argument, 0, 6},
         {"quote-name", no_argument, 0, 'Q'},
         {"help", no_argument, 0, 1},
         {"version", no_argument, 0, 'V'},
@@ -180,6 +183,12 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 4:
             args->dirs_first = 1;
             break;
+        case 5:
+            args->time_style = optarg;
+            break;
+        case 6:
+            args->time_style = "%F %T %z";
+            break;
         case 2:
             if (strcmp(optarg, "always") == 0)
                 args->color_mode = COLOR_ALWAYS;
@@ -193,7 +202,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
@@ -202,7 +211,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--time-style=FMT] [--full-time] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
