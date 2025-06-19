@@ -43,6 +43,7 @@ vls - colorized ls replacement
 - `-x` List entries across columns instead of vertically.
 - `-m` List entries separated by ", " wrapping lines to terminal width.
 - `-Q`, `--quote-name` Quote file names with double quotes, escaping internal quotes and backslashes.
+- `-b` Output backslash escapes for non-printable characters.
 - `-1` List one entry per line.
 - `--color=WHEN` Control colorization. WHEN is `auto`, `always` or `never`.
 - `--help` Display a brief usage message and exit.
@@ -59,6 +60,7 @@ vls -al
 vls -tR /etc
 vls --color=never
 vls -I '*.o'
+vls -b
 ```
 
 ## See Also

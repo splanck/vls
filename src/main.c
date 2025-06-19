@@ -3,19 +3,29 @@
 #include "args.h"
 #include "color.h"
 #include <sys/stat.h>
+#include <ctype.h>
 
-static void print_quoted(const char *s, int quote) {
-    if (!quote) {
+static void print_quoted(const char *s, int quote, int escape_nonprint) {
+    if (!quote && !escape_nonprint) {
         fputs(s, stdout);
         return;
     }
-    putchar('"');
+    if (quote)
+        putchar('"');
     for (const char *p = s; *p; p++) {
-        if (*p == '"' || *p == '\\')
+        unsigned char c = (unsigned char)*p;
+        if (quote && (c == '"' || c == '\\'))
             putchar('\\');
-        putchar(*p);
+        if (escape_nonprint && !isprint(c)) {
+            char buf[5];
+            snprintf(buf, sizeof(buf), "\\%03o", c);
+            fputs(buf, stdout);
+        } else {
+            putchar(c);
+        }
     }
-    putchar('"');
+    if (quote)
+        putchar('"');
 }
 
 int main(int argc, char *argv[]) {
@@ -25,7 +35,7 @@ int main(int argc, char *argv[]) {
     for (size_t i = 0; i < args.path_count; i++) {
         const char *path = args.paths[i];
         if (!args.recursive && args.path_count > 1 && !args.list_dirs_only) {
-            print_quoted(path, args.quote_names);
+            print_quoted(path, args.quote_names, args.escape_nonprint);
             printf(":\n");
         }
 
@@ -45,7 +55,7 @@ int main(int argc, char *argv[]) {
                               args.show_context, 1, 1, args.ignore_backups,
                                 args.ignore_patterns, args.ignore_count, args.columns,
                                 args.across_columns, args.one_per_line, args.comma_separated,
-                                args.show_blocks, args.quote_names, args.block_size);
+                                args.show_blocks, args.quote_names, args.escape_nonprint, args.block_size);
                 if (i < args.path_count - 1)
                     printf("\n");
                 continue;
@@ -61,7 +71,7 @@ int main(int argc, char *argv[]) {
                       args.show_context, args.follow_links, args.list_dirs_only, args.ignore_backups,
                         args.ignore_patterns, args.ignore_count, args.columns,
                         args.across_columns, args.one_per_line, args.comma_separated,
-                        args.show_blocks, args.quote_names, args.block_size);
+                        args.show_blocks, args.quote_names, args.escape_nonprint, args.block_size);
         if (i < args.path_count - 1)
             printf("\n");
     }

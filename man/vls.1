@@ -136,6 +136,9 @@ Print entries separated by ", " wrapping lines to terminal width.
 Quote file names with double quotes, escaping internal quotes and
 backslashes.
 .TP
+.BR -b
+Output backslash escapes for non-printable characters.
+.TP
 .BR -1
 List one entry per line.
 .TP
@@ -163,5 +166,8 @@ List current directory without colorization.
 .TP
 .B vls -I '*.o'
 Ignore files ending in .o
+.TP
+.B vls -b
+Escape non-printable characters with backslash codes
 .SH SEE ALSO
 .BR ls (1)

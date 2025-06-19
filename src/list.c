@@ -140,31 +140,56 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-static size_t quoted_len(const char *s) {
+static size_t quoted_len(const char *s, int escape_nonprint) {
     size_t len = 2; /* surrounding quotes */
     for (const char *p = s; *p; p++) {
-        if (*p == '"' || *p == '\\')
+        unsigned char c = (unsigned char)*p;
+        if (c == '"' || c == '\\')
             len++; /* for escape */
-        len++;
+        if (escape_nonprint && !isprint(c))
+            len += 3; /* octal */
+        else
+            len++;
     }
     return len;
 }
 
-static void print_quoted(const char *s, int quote) {
-    if (!quote) {
+static size_t escaped_len(const char *s) {
+    size_t len = 0;
+    for (const char *p = s; *p; p++) {
+        unsigned char c = (unsigned char)*p;
+        if (!isprint(c))
+            len += 4; /* backslash + 3 octal digits */
+        else
+            len++;
+    }
+    return len;
+}
+
+static void print_quoted(const char *s, int quote, int escape_nonprint) {
+    if (!quote && !escape_nonprint) {
         fputs(s, stdout);
         return;
     }
-    putchar('"');
+    if (quote)
+        putchar('"');
     for (const char *p = s; *p; p++) {
-        if (*p == '"' || *p == '\\')
+        unsigned char c = (unsigned char)*p;
+        if (quote && (c == '"' || c == '\\'))
             putchar('\\');
-        putchar(*p);
+        if (escape_nonprint && !isprint(c)) {
+            char buf[5];
+            snprintf(buf, sizeof(buf), "\\%03o", c);
+            fputs(buf, stdout);
+        } else {
+            putchar(c);
+        }
     }
-    putchar('"');
+    if (quote)
+        putchar('"');
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int sort_version, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int show_context, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int comma_separated, int show_blocks, int quote_names, int escape_nonprint, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -272,19 +297,19 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
 #endif
             }
             printf(" %s", prefix);
-            print_quoted(path, quote_names);
+            print_quoted(path, quote_names, escape_nonprint);
             printf("%s%s\n", suffix, indicator);
         } else {
             if (show_blocks)
                 printf("%*lu ", (int)single_w, single_blocks);
             if (show_inode) {
                 printf("%10llu %s", (unsigned long long)st.st_ino, prefix);
-                print_quoted(path, quote_names);
+                print_quoted(path, quote_names, escape_nonprint);
                 printf("%s%s\n", suffix, indicator);
             }
             else {
                 fputs(prefix, stdout);
-                print_quoted(path, quote_names);
+                print_quoted(path, quote_names, escape_nonprint);
                 printf("%s%s\n", suffix, indicator);
             }
         }
@@ -298,7 +323,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
     }
 
     if (recursive) {
-        print_quoted(path, quote_names);
+        print_quoted(path, quote_names, escape_nonprint);
         printf(":\n");
     }
 
@@ -437,7 +462,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                 size_w = len_sz;
         }
 
-        size_t name_len = quote_names ? quoted_len(ent->name) : strlen(ent->name);
+        size_t name_len = quote_names ? quoted_len(ent->name, escape_nonprint) :
+                            (escape_nonprint ? escaped_len(ent->name) : strlen(ent->name));
         if (show_inode)
             name_len += num_digits(ent->st.st_ino) + 1;
         if (classify) {
@@ -498,14 +524,15 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                 snprintf(inode_buf, sizeof(inode_buf), "%10llu ", (unsigned long long)ent->st.st_ino);
 
             size_t len = strlen(block_buf) + strlen(inode_buf) +
-                         (quote_names ? quoted_len(ent->name) : strlen(ent->name)) +
+                         (quote_names ? quoted_len(ent->name, escape_nonprint) :
+                          (escape_nonprint ? escaped_len(ent->name) : strlen(ent->name))) +
                          strlen(indicator);
             if (line_len && line_len + len > (size_t)term_width) {
                 putchar('\n');
                 line_len = 0;
             }
             printf("%s%s%s", block_buf, inode_buf, prefix);
-            print_quoted(ent->name, quote_names);
+            print_quoted(ent->name, quote_names, escape_nonprint);
             printf("%s%s", suffix, indicator);
             line_len += len;
             if (i < count - 1) {
@@ -569,10 +596,12 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             if (show_inode)
                 snprintf(inode_buf, sizeof(inode_buf), "%10llu ", (unsigned long long)ent->st.st_ino);
             printf("%s%s%s", block_buf, inode_buf, prefix);
-            print_quoted(ent->name, quote_names);
+            print_quoted(ent->name, quote_names, escape_nonprint);
             printf("%s%s", suffix, indicator);
 
-            size_t len = (quote_names ? quoted_len(ent->name) : strlen(ent->name)) + strlen(indicator) + strlen(inode_buf) + strlen(block_buf);
+            size_t len = (quote_names ? quoted_len(ent->name, escape_nonprint) :
+                           (escape_nonprint ? escaped_len(ent->name) : strlen(ent->name))) +
+                         strlen(indicator) + strlen(inode_buf) + strlen(block_buf);
             if ((i % cols == cols - 1) || i == count - 1) {
                 putchar('\n');
             } else {
@@ -620,10 +649,12 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                     if (show_inode)
                         snprintf(inode_buf, sizeof(inode_buf), "%10llu ", (unsigned long long)ent->st.st_ino);
                     printf("%s%s%s", block_buf, inode_buf, prefix);
-                    print_quoted(ent->name, quote_names);
+                    print_quoted(ent->name, quote_names, escape_nonprint);
                     printf("%s%s", suffix, indicator);
 
-                    size_t len = (quote_names ? quoted_len(ent->name) : strlen(ent->name)) + strlen(indicator) + strlen(inode_buf) + strlen(block_buf);
+                    size_t len = (quote_names ? quoted_len(ent->name, escape_nonprint) :
+                                   (escape_nonprint ? escaped_len(ent->name) : strlen(ent->name))) +
+                                 strlen(indicator) + strlen(inode_buf) + strlen(block_buf);
                     if (c == cols - 1 || i + rows >= count) {
                         putchar('\n');
                     } else {
@@ -733,18 +764,18 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
 #endif
             }
             printf(" %s", prefix);
-            print_quoted(ent->name, quote_names);
+            print_quoted(ent->name, quote_names, escape_nonprint);
             printf("%s%s\n", suffix, indicator);
         } else {
             if (show_blocks)
                 printf("%*lu ", (int)block_w, blk);
             if (show_inode) {
                 printf("%10llu %s", (unsigned long long)ent->st.st_ino, prefix);
-                print_quoted(ent->name, quote_names);
+                print_quoted(ent->name, quote_names, escape_nonprint);
                 printf("%s%s\n", suffix, indicator);
             } else {
                 fputs(prefix, stdout);
-                print_quoted(ent->name, quote_names);
+                print_quoted(ent->name, quote_names, escape_nonprint);
                 printf("%s%s\n", suffix, indicator);
             }
         }
@@ -763,7 +794,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, sort_version, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, show_context, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, comma_separated, show_blocks, quote_names, escape_nonprint, block_size);
         }
     }
 

@@ -41,6 +41,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->comma_separated = 0;
     args->show_blocks = 0;
     args->quote_names = 0;
+    args->escape_nonprint = 0;
     args->block_size = 0;
     args->paths = NULL;
     args->path_count = 0;
@@ -59,7 +60,7 @@ void parse_args(int argc, char *argv[], Args *args) {
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtrucUfhXvRFpI:BhHLZdgonCx1msQVk", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtrucUfhXvRFpI:BhHLZdgonCx1msbQVk", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -160,6 +161,9 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'n':
             args->numeric_ids = 1;
             break;
+        case 'b':
+            args->escape_nonprint = 1;
+            break;
         case 'Q':
             args->quote_names = 1;
             break;
@@ -189,7 +193,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them or -H for command line arguments only. Context display with -Z is supported only on systems with SELinux.\n");
             exit(0);
             break;
@@ -198,7 +202,7 @@ void parse_args(int argc, char *argv[], Args *args) {
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-v] [-f] [-U] [-r] [-R] [-d] [-p] [-I PAT] [-B] [-L] [-H] [-Z] [-F] [-C] [-x] [-m] [-1] [-h] [-n] [-g] [-o] [-s] [-k] [-b] [-Q] [-V] [--color=WHEN] [--block-size=SIZE] [--group-directories-first] [--almost-all] [--ignore=PAT] [--quote-name] [--help] [--version] [path]\n", argv[0]);
             exit(1);
         }
     }
