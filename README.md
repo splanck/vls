@@ -1,96 +1,22 @@
 # vls
-ls replacement utility for UNIX
 
-`vls` is a minimal tool intended as a replacement for the standard `ls` command.
+A minimal, colorized replacement for `ls`.
 
-File names are colorized based on type (directories, links and executables). Use `--color=WHEN` to control coloring where `WHEN` is `auto`, `always` or `never`. The color scheme can be customized through the `LS_COLORS` environment variable.
+## Features
+- Colorizes output based on file type with `LS_COLORS` customization
+- Supports long listings and various sorting modes (time, size, extension)
+- Recursive listing and directory-first ordering
+- Pattern ignoring and indicator characters ("/", "*", "@")
+- Options for quoting names, human readable sizes and more
+- Cross‑platform Makefile for Linux, macOS and NetBSD
 
-See [vlsdoc.md](./vlsdoc.md) for a complete description of command-line options, environment variables and additional usage examples.
+For a complete list of options see [vlsdoc.md](./vlsdoc.md) or the manual page at [man/vls.1](./man/vls.1).
 
-Example of long format output:
-
-```sh
-$ ./build/vls -l
--rw-r--r-- 1 user group 35149 Jun 18 16:55 LICENSE
--rw-r--r-- 1 user group  1104 Jun 18 16:55 Makefile
--rw-r--r-- 1 user group  1512 Jun 18 16:55 README.md
-```
-
-Ignore object files:
-
-```sh
-$ ./build/vls -I '*.o'
-```
-
-## Building and Testing
-The build system uses a simple Makefile which detects the host OS with
-`uname` and appends a few platform specific flags. In most cases you only
-need to run `make`:
-
-```sh
-make
-```
-
-### Linux
-On Linux the Makefile defines `-D_GNU_SOURCE` automatically. Simply run the
-commands above. To run the basic tests:
-
-```sh
-make test
-```
-
-### macOS
-The Makefile adds `-D_DARWIN_C_SOURCE` on macOS. Use the same build and test
-commands:
-
-```sh
-make
-make test
-```
-
-### NetBSD
-On NetBSD the flag `-D_NETBSD_SOURCE` is applied. Invoke make normally:
-
-```sh
-make
-make test
-```
-
-You can also provide your own `CFLAGS` to override or extend the defaults:
-
-```sh
-make CFLAGS="-O2"
-```
-
-The resulting executable is placed in `build/vls`.
+## Building
+Run `make` to compile. Override `CFLAGS` or `PREFIX` as needed.
 
 ## Installation
-Install the program and its manual page to `/usr/local` with:
+Install with `sudo make install`. Use `PREFIX` to choose a different destination.
 
-```sh
-sudo make install
-```
-
-Use the variable `PREFIX` to choose a different destination:
-
-```sh
-sudo make install PREFIX=/opt
-```
-
-To remove the installed files run:
-
-```sh
-sudo make uninstall PREFIX=/opt
-```
-
-
-## Man Page
-The manual page is included in `man/vls.1` and installed alongside the
-program. View it directly with:
-
-```sh
-man ./man/vls.1
-```
-
-After installation run `mandb` or your system's equivalent to update the
-man page index if necessary.
+## License
+Distributed under the GNU General Public License version 3. See [LICENSE](./LICENSE) for details.
