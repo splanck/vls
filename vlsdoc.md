@@ -51,8 +51,9 @@ vls - colorized ls replacement
 - `-C` List entries vertically in columns (default for terminals).
 - `-x` List entries across columns instead of vertically.
 - `-m` List entries separated by ", " wrapping lines to terminal width.
-- `-Q`, `--quote-name` Quote file names with double quotes, escaping internal quotes and backslashes.
-- `-b` Output backslash escapes for non-printable characters.
+- `-Q`, `--quote-name` Use C-style quoting for file names.
+- `-b` Use backslash escapes for non-printable characters.
+- `--quoting-style=STYLE` Select quoting style: `literal`, `c`, `escape`.
 - `-1` List one entry per line.
 - `--color=WHEN` Control colorization. WHEN is `auto`, `always` or `never`.
 - `--help` Display a brief usage message and exit.

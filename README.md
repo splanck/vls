@@ -11,8 +11,9 @@ A minimal, colorized replacement for `ls`.
 - Hide entries matching glob patterns with `--hide=PATTERN`
 - Optional dereferencing of command line symlinks (`-H`)
 - Optional display of SELinux contexts (`-Z`, Linux only)
-- Options for quoting names, human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
-- Backslash-escapes for non-printable characters (`-b`)
+- Quoting styles with `--quoting-style=STYLE` (`literal`, `c`, `escape`),
+  with `-Q` and `-b` as shortcuts
+- Human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
 - Customizable timestamp format via `--time-style=FMT` and `--full-time`
 - Select which timestamp to show with `--time=WORD` (`mod`, `access`, `use`, `status`)
 - Cross‑platform Makefile for Linux, macOS and NetBSD

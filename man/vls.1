@@ -156,11 +156,13 @@ List entries across columns instead of vertically.
 Print entries separated by ", " wrapping lines to terminal width.
 .TP
 .BR -Q , --quote-name
-Quote file names with double quotes, escaping internal quotes and
-backslashes.
+Use C-style quoting for file names.
 .TP
 .BR -b
-Output backslash escapes for non-printable characters.
+Use backslash escapes for non-printable characters.
+.TP
+.BR --quoting-style=\fISTYLE\fR
+Select quoting style. STYLE is \fIliteral\fR, \fIc\fR or \fIescape\fR.
 .TP
 .BR -1
 List one entry per line.
