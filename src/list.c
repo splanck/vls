@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <wchar.h>
 #include <pwd.h>
 #include <grp.h>
 #include <time.h>
@@ -212,36 +213,58 @@ static size_t num_digits(unsigned long long n) {
 
 static size_t quoted_len(const char *s, int escape_nonprint, int hide_control) {
     size_t len = 2; /* surrounding quotes */
-    for (const char *p = s; *p; p++) {
-        unsigned char c = (unsigned char)*p;
-        if (c == '"' || c == '\\')
+    mbstate_t st;
+    memset(&st, 0, sizeof(st));
+    const char *p = s;
+    while (*p) {
+        wchar_t wc;
+        size_t n = mbrtowc(&wc, p, MB_CUR_MAX, &st);
+        if (n == (size_t)-1 || n == (size_t)-2) {
+            wc = (unsigned char)*p;
+            n = 1;
+            memset(&st, 0, sizeof(st));
+        }
+        if (wc == L'"' || wc == L'\\')
             len++; /* for escape */
-        if (!isprint(c)) {
+        int w = wcwidth(wc);
+        if (w < 0) {
             if (hide_control)
                 len += 1;
             else if (escape_nonprint)
-                len += 3; /* octal */
+                len += 4; /* backslash + 3 octal digits */
             else
                 len += 1;
         } else {
-            len++;
+            len += w;
         }
+        p += n;
     }
     return len;
 }
 
 static size_t escaped_len(const char *s, int hide_control) {
     size_t len = 0;
-    for (const char *p = s; *p; p++) {
-        unsigned char c = (unsigned char)*p;
-        if (!isprint(c)) {
+    mbstate_t st;
+    memset(&st, 0, sizeof(st));
+    const char *p = s;
+    while (*p) {
+        wchar_t wc;
+        size_t n = mbrtowc(&wc, p, MB_CUR_MAX, &st);
+        if (n == (size_t)-1 || n == (size_t)-2) {
+            wc = (unsigned char)*p;
+            n = 1;
+            memset(&st, 0, sizeof(st));
+        }
+        int w = wcwidth(wc);
+        if (w < 0) {
             if (hide_control)
                 len += 1;
             else
                 len += 4; /* backslash + 3 octal digits */
         } else {
-            len++;
+            len += w;
         }
+        p += n;
     }
     return len;
 }

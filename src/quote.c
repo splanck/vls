@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <ctype.h>
+#include <wchar.h>
+#include <stdlib.h>
+#include <string.h>
 #include "quote.h"
 
 void print_quoted(const char *s, QuotingStyle style, int hide_control, int show_controls, int literal_names) {
@@ -19,23 +22,34 @@ void print_quoted(const char *s, QuotingStyle style, int hide_control, int show_
     }
     if (quote)
         putchar('"');
-    for (const char *p = s; *p; p++) {
-        unsigned char c = (unsigned char)*p;
-        if (quote && (c == '"' || c == '\\'))
+    mbstate_t st;
+    memset(&st, 0, sizeof(st));
+    const char *p = s;
+    while (*p) {
+        wchar_t wc;
+        size_t n = mbrtowc(&wc, p, MB_CUR_MAX, &st);
+        if (n == (size_t)-1 || n == (size_t)-2) {
+            wc = (unsigned char)*p;
+            n = 1;
+            memset(&st, 0, sizeof(st));
+        }
+        if (quote && (wc == L'"' || wc == L'\\'))
             putchar('\\');
-        if (!isprint(c)) {
+        int w = wcwidth(wc);
+        if (w < 0) {
             if (hide_control) {
                 putchar('?');
             } else if (escape_nonprint) {
-                char buf[5];
-                snprintf(buf, sizeof(buf), "\\%03o", c);
-                fputs(buf, stdout);
+                for (size_t i = 0; i < n; i++) {
+                    printf("\\%03o", (unsigned char)p[i]);
+                }
             } else {
-                putchar(c);
+                fwrite(p, 1, n, stdout);
             }
         } else {
-            putchar(c);
+            fwrite(p, 1, n, stdout);
         }
+        p += n;
     }
     if (quote)
         putchar('"');

@@ -53,7 +53,7 @@ build:
 test: build/vls
 	@echo "Running tests..."
 	mkdir -p build/testdir build/emptydir
-	touch build/testdir/foo build/testdir/.bar
+	touch build/testdir/foo build/testdir/.bar build/testdir/café build/testdir/こんにちは
 	@set -e; \
 	./build/vls -A build/testdir > build/out_A.txt; rc=$$?; \
 	echo $$rc > build/rc_A.txt; test $$rc -eq 0; \
@@ -70,12 +70,16 @@ test: build/vls
 	./build/vls --color=always build/testdir > build/out_color_on.txt; rc=$$?; \
 	echo $$rc > build/rc_color_on.txt; test $$rc -eq 0; \
 	grep -P -q '\x1b\[' build/out_color_on.txt; \
-	./build/vls --color=never build/testdir > build/out_color_off.txt; rc=$$?; \
-	echo $$rc > build/rc_color_off.txt; test $$rc -eq 0; \
-	! grep -P -q '\x1b\[' build/out_color_off.txt; \
-	./build/vls -C build/emptydir > build/out_empty.txt; rc=$$?; \
+        ./build/vls --color=never build/testdir > build/out_color_off.txt; rc=$$?; \
+        echo $$rc > build/rc_color_off.txt; test $$rc -eq 0; \
+        ! grep -P -q '\x1b\[' build/out_color_off.txt; \
+        ./build/vls -Q build/testdir > build/out_Q.txt; rc=$$?; \
+        echo $$rc > build/rc_Q.txt; test $$rc -eq 0; \
+        grep -q '"café"' build/out_Q.txt; \
+        grep -q '"こんにちは"' build/out_Q.txt; \
+        ./build/vls -C build/emptydir > build/out_empty.txt; rc=$$?; \
 	echo $$rc > build/rc_empty.txt; test $$rc -eq 0; \
-grep -q '^$$' build/out_empty.txt; \
+	grep -q '^$$' build/out_empty.txt; \
 	rm -r build/testdir build/emptydir; \
 	echo "Tests completed"
 
