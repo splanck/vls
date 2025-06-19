@@ -38,6 +38,7 @@ typedef struct {
     const char **ignore_patterns;
     size_t ignore_count;
     int columns;
+    int across_columns;
     int one_per_line;
     int show_blocks;
     int quote_names;

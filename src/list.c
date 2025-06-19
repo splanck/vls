@@ -128,7 +128,7 @@ static void print_quoted(const char *s, int quote) {
     putchar('"');
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int one_per_line, int show_blocks, int quote_names, unsigned block_size) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int dirs_first, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, const char **ignore_patterns, size_t ignore_count, int columns, int across_columns, int one_per_line, int show_blocks, int quote_names, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -413,10 +413,15 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         size_t cols = term_width / (int)col_width;
         if (cols == 0)
             cols = 1;
-        for (size_t i = 0; i < count; i++) {
-            size_t idx = reverse ? count - 1 - i : i;
-            const Entry *ent = &entries[idx];
-            unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
+        if (cols > count)
+            cols = count;
+        size_t rows = (count + cols - 1) / cols;
+
+        if (across_columns) {
+            for (size_t i = 0; i < count; i++) {
+                size_t idx = reverse ? count - 1 - i : i;
+                const Entry *ent = &entries[idx];
+                unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
 
             const char *prefix = "";
             const char *suffix = "";
@@ -457,6 +462,59 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             } else {
                 for (size_t sp = len; sp < col_width; sp++)
                     putchar(' ');
+            }
+        }
+        } else {
+            for (size_t r = 0; r < rows; r++) {
+                for (size_t c = 0; c < cols; c++) {
+                    size_t i = c * rows + r;
+                    if (i >= count)
+                        continue;
+                    size_t idx = reverse ? count - 1 - i : i;
+                    const Entry *ent = &entries[idx];
+                    unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
+
+                    const char *prefix = "";
+                    const char *suffix = "";
+                    const char *indicator = "";
+                    if (use_color) {
+                        if (S_ISDIR(ent->st.st_mode))
+                            prefix = color_dir();
+                        else if (S_ISLNK(ent->st.st_mode))
+                            prefix = color_link();
+                        else if (ent->st.st_mode & S_IXUSR)
+                            prefix = color_exec();
+                        suffix = color_reset();
+                    }
+                    if (classify) {
+                        if (S_ISDIR(ent->st.st_mode))
+                            indicator = "/";
+                        else if (S_ISLNK(ent->st.st_mode))
+                            indicator = "@";
+                        else if (ent->st.st_mode & S_IXUSR)
+                            indicator = "*";
+                    } else if (slash_dirs && S_ISDIR(ent->st.st_mode)) {
+                        indicator = "/";
+                    }
+
+                    char block_buf[32] = "";
+                    if (show_blocks)
+                        snprintf(block_buf, sizeof(block_buf), "%*lu ", (int)block_w, blk);
+                    char inode_buf[32] = "";
+                    if (show_inode)
+                        snprintf(inode_buf, sizeof(inode_buf), "%10llu ", (unsigned long long)ent->st.st_ino);
+                    printf("%s%s%s", block_buf, inode_buf, prefix);
+                    print_quoted(ent->name, quote_names);
+                    printf("%s%s", suffix, indicator);
+
+                    size_t len = (quote_names ? quoted_len(ent->name) : strlen(ent->name)) + strlen(indicator) + strlen(inode_buf) + strlen(block_buf);
+                    if (c == cols - 1 || i + rows >= count) {
+                        putchar('\n');
+                    } else {
+                        for (size_t sp = len; sp < col_width; sp++)
+                            putchar(' ');
+                    }
+                }
             }
         }
     } else {
@@ -573,7 +631,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, one_per_line, show_blocks, quote_names, block_size);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, dirs_first, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, ignore_patterns, ignore_count, columns, across_columns, one_per_line, show_blocks, quote_names, block_size);
         }
     }
 
