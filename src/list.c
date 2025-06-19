@@ -102,7 +102,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_ctime, int sort_size, int sort_extension, int unsorted, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line, int show_blocks, unsigned block_size) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -138,6 +138,9 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         } else if (slash_dirs && S_ISDIR(st.st_mode)) {
             indicator = "/";
         }
+
+        unsigned long single_blocks = (unsigned long)((st.st_blocks * 512 + block_size - 1) / block_size);
+        size_t single_w = num_digits(single_blocks);
 
         if (long_format) {
             char size_buf[16];
@@ -183,6 +186,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                                        sort_ctime ? &st.st_ctime : &st.st_mtime);
             strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
 
+            if (show_blocks)
+                printf("%*lu ", (int)single_w, single_blocks);
             if (show_inode)
                 printf("%10llu ", (unsigned long long)st.st_ino);
             printf("%s 1 ", perms);
@@ -194,6 +199,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                    (int)strlen(size_buf), size_buf,
                    time_buf, prefix, path, suffix, indicator);
         } else {
+            if (show_blocks)
+                printf("%*lu ", (int)single_w, single_blocks);
             if (show_inode)
                 printf("%10llu %s%s%s%s\n", (unsigned long long)st.st_ino, prefix, path, suffix, indicator);
             else
@@ -270,12 +277,20 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         qsort(entries, count, sizeof(Entry), cmp);
     }
 
-    size_t link_w = 0, owner_w = 0, group_w = 0, size_w = 0;
+    size_t link_w = 0, owner_w = 0, group_w = 0, size_w = 0, block_w = 0;
+    unsigned long total_blocks = 0;
     size_t max_len = 0;
     if (long_format) {
         for (size_t i = 0; i < count; i++) {
             const Entry *ent = &entries[i];
             size_t len;
+            if (show_blocks) {
+                unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
+                total_blocks += blk;
+                size_t d = num_digits(blk);
+                if (d > block_w)
+                    block_w = d;
+            }
             if (num_digits(ent->st.st_nlink) > link_w)
                 link_w = num_digits(ent->st.st_nlink);
 
@@ -307,6 +322,13 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
     for (size_t i = 0; i < count; i++) {
         const Entry *ent = &entries[i];
         size_t len = strlen(ent->name);
+        if (show_blocks) {
+            unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
+            total_blocks += blk;
+            size_t d = num_digits(blk);
+            if (d > block_w)
+                block_w = d;
+        }
         if (show_inode)
             len += num_digits(ent->st.st_ino) + 1;
         if (classify) {
@@ -318,6 +340,12 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         if (len > max_len)
             max_len = len;
     }
+
+    if (show_blocks)
+        max_len += block_w + 1;
+
+    if (show_blocks)
+        printf("total %lu\n", total_blocks);
 
     if (!long_format && columns && !one_per_line) {
         int term_width = 80;
@@ -331,6 +359,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         for (size_t i = 0; i < count; i++) {
             size_t idx = reverse ? count - 1 - i : i;
             const Entry *ent = &entries[idx];
+            unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
 
             const char *prefix = "";
             const char *suffix = "";
@@ -355,12 +384,15 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                 indicator = "/";
             }
 
+            char block_buf[32] = "";
+            if (show_blocks)
+                snprintf(block_buf, sizeof(block_buf), "%*lu ", (int)block_w, blk);
             char inode_buf[32] = "";
             if (show_inode)
                 snprintf(inode_buf, sizeof(inode_buf), "%10llu ", (unsigned long long)ent->st.st_ino);
-            printf("%s%s%s%s%s", inode_buf, prefix, ent->name, suffix, indicator);
+            printf("%s%s%s%s%s%s", block_buf, inode_buf, prefix, ent->name, suffix, indicator);
 
-            size_t len = strlen(ent->name) + strlen(indicator) + strlen(inode_buf);
+            size_t len = strlen(ent->name) + strlen(indicator) + strlen(inode_buf) + strlen(block_buf);
             if ((i % cols == cols - 1) || i == count - 1) {
                 putchar('\n');
             } else {
@@ -372,6 +404,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
     for (size_t i = 0; i < count; i++) {
         size_t idx = reverse ? count - 1 - i : i;
         const Entry *ent = &entries[idx];
+        unsigned long blk = (unsigned long)((ent->st.st_blocks * 512 + block_size - 1) / block_size);
 
         const char *prefix = "";
         const char *suffix = "";
@@ -441,6 +474,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                                        &ent->st.st_mtime);
             strftime(time_buf, sizeof(time_buf), "%b %e %H:%M", tm);
 
+            if (show_blocks)
+                printf("%*lu ", (int)block_w, blk);
             if (show_inode)
                 printf("%10llu ", (unsigned long long)ent->st.st_ino);
             printf("%s %*lu ", perms, (int)link_w, (unsigned long)ent->st.st_nlink);
@@ -452,6 +487,8 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
                    (int)size_w, size_buf,
                    time_buf, prefix, ent->name, suffix, indicator);
         } else {
+            if (show_blocks)
+                printf("%*lu ", (int)block_w, blk);
             if (show_inode)
                 printf("%10llu %s%s%s%s\n", (unsigned long long)ent->st.st_ino, prefix, ent->name, suffix, indicator);
             else
@@ -472,7 +509,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_ctime, sort_size, sort_extension, unsorted, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line, show_blocks, block_size);
         }
     }
 

@@ -30,6 +30,8 @@ void parse_args(int argc, char *argv[], Args *args) {
     args->ignore_backups = 0;
     args->columns = isatty(STDOUT_FILENO);
     args->one_per_line = 0;
+    args->show_blocks = 0;
+    args->block_size = 0;
     args->paths = NULL;
     args->path_count = 0;
 
@@ -37,12 +39,13 @@ void parse_args(int argc, char *argv[], Args *args) {
         {"color", required_argument, 0, 2},
         {"almost-all", no_argument, 0, 'A'},
         {"ignore-backups", no_argument, 0, 'B'},
+        {"block-size", required_argument, 0, 3},
         {"help", no_argument, 0, 1},
         {0, 0, 0, 0}
     };
 
     int opt;
-    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpBhLdgonC1", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "AialtrucUfhXRFpBhLdgonC1s", long_options, NULL)) != -1) {
         switch (opt) {
         case 'A':
             args->almost_all = 1;
@@ -102,6 +105,9 @@ void parse_args(int argc, char *argv[], Args *args) {
         case 'L':
             args->follow_links = 1;
             break;
+        case 's':
+            args->show_blocks = 1;
+            break;
         case 'g':
             args->hide_owner = 1;
             break;
@@ -113,6 +119,13 @@ void parse_args(int argc, char *argv[], Args *args) {
             break;
         case 'n':
             args->numeric_ids = 1;
+            break;
+        case 3:
+            args->block_size = (unsigned)strtoul(optarg, NULL, 10);
+            if (args->block_size == 0) {
+                fprintf(stderr, "Invalid block size: %s\n", optarg);
+                exit(1);
+            }
             break;
         case 2:
             if (strcmp(optarg, "always") == 0)
@@ -127,14 +140,18 @@ void parse_args(int argc, char *argv[], Args *args) {
             }
             break;
         case 1:
-            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
+            printf("Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--almost-all] [--help] [path]\n", argv[0]);
             printf("Default is to display information about symbolic links. Use -L to follow them.\n");
             exit(0);
             break;
         default:
-            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [--color=WHEN] [--almost-all] [--help] [path]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-a] [-A] [-l] [-i] [-t] [-u] [-c] [-S] [-X] [-f] [-U] [-r] [-R] [-d] [-p] [-B] [-L] [-F] [-C] [-1] [-h] [-n] [-g] [-o] [-s] [--color=WHEN] [--block-size=SIZE] [--almost-all] [--help] [path]\n", argv[0]);
             exit(1);
         }
+    }
+
+    if (args->block_size == 0) {
+        args->block_size = getenv("POSIXLY_CORRECT") ? 512 : 1024;
     }
 
     if (optind < argc) {

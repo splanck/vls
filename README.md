@@ -19,6 +19,8 @@ Use `-R` to recursively list subdirectories (symbolic links are not followed).
 Use `-d` to list directory arguments themselves rather than their contents.
 Use `-F` to append indicators to entries: `/` for directories, `*` for executables and `@` for symbolic links.
 Use `-p` to append '/' to directory names.
+Use `-s` to display the number of blocks allocated to each file.
+Use `--block-size=SIZE` to override the default block size (512 or 1024 bytes).
 Use `-h` to display file sizes in human readable units when combined with `-l`.
 Use `-L` to follow symbolic links when retrieving file details (the default is to display information about the links themselves).
 Use `-n` to show numeric user and group IDs in long-format output.
