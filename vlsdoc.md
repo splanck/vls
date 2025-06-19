@@ -42,6 +42,7 @@ vls - colorized ls replacement
 - `-o` Omit the group column in long format output.
 - `-B`, `--ignore-backups` Do not list files ending with '~'.
 - `-I PATTERN`, `--ignore=PATTERN` Do not list entries matching the shell PATTERN. May be repeated.
+- `--hide=PATTERN` Hide entries matching PATTERN unless `-a` or `-A` is used. May be repeated.
 - `-C` List entries vertically in columns (default for terminals).
 - `-x` List entries across columns instead of vertically.
 - `-m` List entries separated by ", " wrapping lines to terminal width.
@@ -63,6 +64,7 @@ vls -al
 vls -tR /etc
 vls --color=never
 vls -I '*.o'
+vls --hide='*.tmp'
 vls -b
 ```
 
