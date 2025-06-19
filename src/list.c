@@ -80,7 +80,7 @@ static size_t num_digits(unsigned long long n) {
     return d;
 }
 
-void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line) {
+void list_directory(const char *path, ColorMode color_mode, int show_hidden, int almost_all, int long_format, int show_inode, int sort_time, int sort_atime, int sort_size, int unsorted, int reverse, int recursive, int classify, int slash_dirs, int human_readable, int numeric_ids, int hide_owner, int hide_group, int follow_links, int list_dirs_only, int ignore_backups, int columns, int one_per_line) {
     int use_color = 0;
     if (color_mode == COLOR_ALWAYS)
         use_color = 1;
@@ -232,14 +232,16 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
         count++;
     }
 
-    int (*cmp)(const void *, const void *) = cmp_names;
-    if (sort_size)
-        cmp = cmp_size;
-    else if (sort_time)
-        cmp = cmp_mtime;
-    else if (sort_atime)
-        cmp = cmp_atime;
-    qsort(entries, count, sizeof(Entry), cmp);
+    if (!unsorted) {
+        int (*cmp)(const void *, const void *) = cmp_names;
+        if (sort_size)
+            cmp = cmp_size;
+        else if (sort_time)
+            cmp = cmp_mtime;
+        else if (sort_atime)
+            cmp = cmp_atime;
+        qsort(entries, count, sizeof(Entry), cmp);
+    }
 
     size_t link_w = 0, owner_w = 0, group_w = 0, size_w = 0;
     size_t max_len = 0;
@@ -441,7 +443,7 @@ void list_directory(const char *path, ColorMode color_mode, int show_hidden, int
             char fullpath[PATH_MAX];
             snprintf(fullpath, sizeof(fullpath), "%s/%s", path, ent->name);
             printf("\n");
-            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line);
+            list_directory(fullpath, color_mode, show_hidden, almost_all, long_format, show_inode, sort_time, sort_atime, sort_size, unsorted, reverse, recursive, classify, slash_dirs, human_readable, numeric_ids, hide_owner, hide_group, follow_links, list_dirs_only, ignore_backups, columns, one_per_line);
         }
     }
 

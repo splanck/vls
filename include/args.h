@@ -20,6 +20,7 @@ typedef struct {
     int sort_time;
     int sort_atime;
     int sort_size;
+    int unsorted;
     int reverse;
     int recursive;
     int list_dirs_only;
