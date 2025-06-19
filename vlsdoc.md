@@ -11,7 +11,7 @@ vls - colorized ls replacement
 
 ## Options
 - `-a` Include directory entries whose names begin with a dot (.).
-- `-A`, `--almost-all` List all entries except `.` and `..`.
+- `-A`, `--almost-all` Show all dot files except `.` and `..`.
 - `-l` Use a long listing format.
 - `-i` Print the inode number of each file.
 - `-t` Sort by modification time, newest first.
