@@ -13,9 +13,13 @@
 #include <time.h>
 #include <fnmatch.h>
 #include <stdbool.h>
-#if __has_include(<selinux/selinux.h>)
-# include <selinux/selinux.h>
-# define HAVE_SELINUX 1
+#ifdef __has_include
+# if __has_include(<selinux/selinux.h>)
+#  include <selinux/selinux.h>
+#  define HAVE_SELINUX 1
+# else
+#  define HAVE_SELINUX 0
+# endif
 #else
 # define HAVE_SELINUX 0
 #endif
