@@ -65,6 +65,7 @@ typedef struct {
     const char *time_style;
     unsigned block_size;
     int hide_control;
+    int show_controls;
 } Args;
 
 void parse_args(int argc, char *argv[], Args *args);

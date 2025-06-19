@@ -14,6 +14,7 @@ A minimal, colorized replacement for `ls`.
 - Quoting styles with `--quoting-style=STYLE` (`literal`, `c`, `escape`),
   with `-Q` and `-b` as shortcuts
 - Hide control characters with `-q`/`--hide-control-chars`
+- Display control characters literally with `--show-control-chars`
 - Human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
 - Customizable timestamp format via `--time-style=FMT` and `--full-time`
 - Select which timestamp to show with `--time=WORD` (`mod`, `access`, `use`, `status`)
