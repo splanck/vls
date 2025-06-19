@@ -291,6 +291,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
 
         unsigned long single_blocks = (unsigned long)((st.st_blocks * 512 + block_size - 1) / block_size);
         size_t single_w = num_digits(single_blocks);
+        size_t link_w = num_digits(st.st_nlink);
 
         if (long_format) {
             char size_buf[16];
@@ -351,7 +352,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                 printf("%*lu ", (int)single_w, single_blocks);
             if (show_inode)
                 printf("%10llu ", (unsigned long long)st.st_ino);
-            printf("%s 1 ", perms);
+            printf("%s %*lu ", perms, (int)link_w, (unsigned long)st.st_nlink);
             if (!hide_owner)
                 printf("%-*s ", (int)strlen(owner_buf), owner_buf);
             if (!hide_group)

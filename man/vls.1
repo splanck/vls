@@ -228,3 +228,9 @@ Append indicator characters to entries
 Output OSC 8 hyperlinks for all file names
 .SH SEE ALSO
 .BR ls (1)
+.SH NOTES
+Earlier versions printed a constant hard link count of 1 when
+listing a single directory with
+.B -l
+. The count now reflects the actual
+number of hard links.
