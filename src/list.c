@@ -406,7 +406,12 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                         : ((st.st_mode & S_ISVTX) ? 'T' : '-');
             perms[10] = '\0';
 
-            char time_buf[32];
+            size_t time_buf_sz = strlen(time_style) * 4 + 32;
+            char *time_buf = malloc(time_buf_sz);
+            if (!time_buf) {
+                perror("malloc");
+                goto cleanup;
+            }
             const time_t *tptr = &st.st_mtime;
             if (time_word) {
                 if (strcmp(time_word, "access") == 0 || strcmp(time_word, "use") == 0)
@@ -420,7 +425,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                     tptr = &st.st_ctime;
             }
             struct tm *tm = localtime(tptr);
-            strftime(time_buf, sizeof(time_buf), time_style, tm);
+            strftime(time_buf, time_buf_sz, time_style, tm);
 
             size_t owner_len = strlen(owner_buf);
             size_t group_len = strlen(group_buf);
@@ -435,6 +440,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             if (!hide_group)
                 printf("%-*s ", (int)group_len, group_buf);
             printf("%*s %s", (int)strlen(size_buf), size_buf, time_buf);
+            free(time_buf);
             if (show_context) {
 #if HAVE_SELINUX
                 char *ctx = NULL;
@@ -1031,7 +1037,12 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                         : ((ent->st.st_mode & S_ISVTX) ? 'T' : '-');
             perms[10] = '\0';
 
-            char time_buf[32];
+            size_t time_buf_sz = strlen(time_style) * 4 + 32;
+            char *time_buf = malloc(time_buf_sz);
+            if (!time_buf) {
+                perror("malloc");
+                goto cleanup;
+            }
             const time_t *tptr = &ent->st.st_mtime;
             if (time_word) {
                 if (strcmp(time_word, "access") == 0 || strcmp(time_word, "use") == 0)
@@ -1045,7 +1056,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
                     tptr = &ent->st.st_ctime;
             }
             struct tm *tm = localtime(tptr);
-            strftime(time_buf, sizeof(time_buf), time_style, tm);
+            strftime(time_buf, time_buf_sz, time_style, tm);
 
             if (show_blocks)
                 printf("%*lu ", (int)block_w, blk);
@@ -1057,6 +1068,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             if (!hide_group)
                 printf("%-*s ", (int)group_w, group_buf);
             printf("%*s %s", (int)size_w, size_buf, time_buf);
+            free(time_buf);
             if (show_context) {
 #if HAVE_SELINUX
                 char *ctx = NULL;

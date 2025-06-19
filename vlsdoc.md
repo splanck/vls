@@ -24,7 +24,9 @@ vls - colorized ls replacement
   `extension`, `version` or `none`.
 - `-f`, `-U` Do not sort; list entries in directory order.
 - `--group-directories-first` List directories before other files.
-- `--time-style=FMT` Format times using `strftime(3)` style FMT.
+- `--time-style=FMT` Format times using `strftime(3)` style FMT. The output
+  buffer is sized relative to `FMT`, so unusually long expansions may be
+  truncated.
 - `--full-time` Equivalent to `--time-style="%F %T %z"`.
 - `--time=WORD` Choose which timestamp field to display: `mod` (default),
   `access`, `use` or `status`.
