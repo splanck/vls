@@ -52,6 +52,7 @@ typedef struct {
     int follow_links;
     int deref_cmdline;
     int human_readable;
+    int human_si;
     int numeric_ids;
     int hide_owner;
     int hide_group;

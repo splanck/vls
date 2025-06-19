@@ -17,7 +17,7 @@ A minimal, colorized replacement for `ls`.
 - Print names literally with `-N`/`--literal`, overriding quoting and escaping options
 - Hide control characters with `-q`/`--hide-control-chars`
 - Display control characters literally with `--show-control-chars`
-- Human readable sizes, column layout (`-C`/`-x`) and comma-separated output (`-m`)
+- Human readable sizes (`-h` uses powers of 1024, `--si` uses powers of 1000), column layout (`-C`/`-x`) and comma-separated output (`-m`)
 - Customizable timestamp format via `--time-style=FMT` and `--full-time`
 - Select which timestamp to show with `--time=WORD` (`mod`, `access`, `use`, `status`)
 - Cross‑platform Makefile for Linux, macOS and NetBSD
