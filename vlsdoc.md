@@ -86,3 +86,8 @@ vls --hyperlink=always
 
 ## See Also
 `ls(1)`
+
+## Notes
+Earlier versions always displayed `1` as the link count when listing a
+single directory with `-l`. The count now shows the actual number of
+hard links.
