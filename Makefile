@@ -73,6 +73,14 @@ test: build/vls
         ./build/vls --color=never build/testdir > build/out_color_off.txt; rc=$$?; \
         echo $$rc > build/rc_color_off.txt; test $$rc -eq 0; \
         ! grep -P -q '\x1b\[' build/out_color_off.txt; \
+        ./build/vls -C --color=always build/testdir > build/out_color_cols.txt; rc=$$?; \
+        echo $$rc > build/rc_color_cols.txt; test $$rc -eq 0; \
+        sed -r 's/\x1b\[[0-9;]*m//g' build/out_color_cols.txt > build/out_color_cols_clean.txt; \
+        ./build/vls -C --color=never build/testdir > build/out_C_nocolor.txt; rc=$$?; \
+        echo $$rc > build/rc_C_nocolor.txt; test $$rc -eq 0; \
+        len_color=$(awk '{print length}' build/out_color_cols_clean.txt); \
+        len_nocolor=$(awk '{print length}' build/out_C_nocolor.txt); \
+        test $$len_color -ge $$len_nocolor; \
         ./build/vls -Q build/testdir > build/out_Q.txt; rc=$$?; \
         echo $$rc > build/rc_Q.txt; test $$rc -eq 0; \
         grep -q '"café"' build/out_Q.txt; \
