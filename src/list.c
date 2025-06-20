@@ -706,6 +706,16 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
         default:
             break;
         }
+        if (use_color) {
+            const char *pfx = "";
+            if (S_ISDIR(ent->st.st_mode))
+                pfx = color_dir();
+            else if (S_ISLNK(ent->st.st_mode))
+                pfx = color_link();
+            else if (ent->st.st_mode & S_IXUSR)
+                pfx = color_exec();
+            name_len += strlen(pfx) + strlen(color_reset());
+        }
         if (name_len > max_len)
             max_len = name_len;
     }
@@ -769,7 +779,7 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
             size_t len = strlen(block_buf) + strlen(inode_buf) +
                          (quote_names ? quoted_len(ent->name, escape_nonprint, hide_control) :
                           (escape_nonprint ? escaped_len(ent->name, hide_control) : strlen(ent->name))) +
-                         strlen(indicator);
+                         strlen(indicator) + strlen(prefix) + strlen(suffix);
             if (line_len && line_len + len > (size_t)term_width) {
                 putchar('\n');
                 line_len = 0;
@@ -872,7 +882,8 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
 
             size_t len = (quote_names ? quoted_len(ent->name, escape_nonprint, hide_control) :
                            (escape_nonprint ? escaped_len(ent->name, hide_control) : strlen(ent->name))) +
-                         strlen(indicator) + strlen(inode_buf) + strlen(block_buf);
+                         strlen(indicator) + strlen(inode_buf) + strlen(block_buf) +
+                         strlen(prefix) + strlen(suffix);
             if ((i % cols == cols - 1) || i == count - 1) {
                 putchar('\n');
             } else {
@@ -945,7 +956,8 @@ void list_directory(const char *path, ColorMode color_mode, HyperlinkMode hyperl
 
                     size_t len = (quote_names ? quoted_len(ent->name, escape_nonprint, hide_control) :
                                    (escape_nonprint ? escaped_len(ent->name, hide_control) : strlen(ent->name))) +
-                                 strlen(indicator) + strlen(inode_buf) + strlen(block_buf);
+                                 strlen(indicator) + strlen(inode_buf) + strlen(block_buf) +
+                                 strlen(prefix) + strlen(suffix);
                     if (c == cols - 1 || i + rows >= count) {
                         putchar('\n');
                     } else {
