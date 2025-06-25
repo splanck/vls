@@ -52,5 +52,5 @@ succeeds and prints expected data. A message is printed once all tests
 pass.
 
 ## License
-Distributed under the GNU General Public License version 3.
+Distributed under the BSD 2-Clause "Simplified" License.
 See [LICENSE](./LICENSE) for details.
